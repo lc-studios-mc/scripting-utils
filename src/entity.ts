@@ -3,12 +3,110 @@ import * as mc from "@minecraft/server";
 /**
  * Checks if the given entity is alive (i.e., has health greater than 0 and is valid).
  * @param entity - The entity to check.
- * @returns {boolean} True if the entity is valid and its current health is greater than 0, otherwise false.
+ * @returns True if the entity is valid and its current health is greater than 0, otherwise false.
  */
 export function isAlive(entity: mc.Entity): boolean {
 	if (!entity.isValid) return false;
 	const health = entity.getComponent("health");
 	return health !== undefined && health.currentValue > 0;
+}
+
+/**
+ * Safely applies an impulse to an entity. This function exists because calling `applyImpulse` directly on a Player will result in an error.
+ * For players, a custom method is used to simulate vanilla impulse behavior.
+ * @param entity - The entity to apply the impulse to.
+ * @param vector - The impulse vector to apply.
+ */
+export function applyImpulseSafe(entity: mc.Entity, vector: mc.Vector3): void {
+	if (entity instanceof mc.Player) {
+		applyImpulseToPlayer(entity, vector);
+		return;
+	}
+
+	entity.applyImpulse(vector);
+}
+
+/**
+ * Simulates applying an impulse to a player by using knockback to closely match vanilla impulse behavior.
+ * This function exists because calling `applyImpulse` directly on a Player will result in an error.
+ * @param player - The player entity to apply the impulse to.
+ * @param vector - The impulse vector to apply.
+ */
+export function applyImpulseToPlayer(player: mc.Player, vector: mc.Vector3): void {
+	const { x, y, z } = vector;
+	const previousVelocity = player.getVelocity();
+
+	// Calculate the norm (magnitude) of the horizontal components (x and z)
+	const horizontalNorm = Math.sqrt(x * x + z * z);
+
+	// Calculate directionX and directionZ as normalized values
+	let directionX = 0;
+	let directionZ = 0;
+	if (horizontalNorm !== 0) {
+		directionX = x / horizontalNorm;
+		directionZ = z / horizontalNorm;
+	}
+
+	// The horizontalStrength is the horizontal norm of the input vector
+	// multiplied by 2.5 based on experimentation
+	const horizontalStrength = horizontalNorm * 2.5;
+
+	// The vertical component is directly taken as verticalStrength
+	// The previous velocity is also taken into account, because normal impulse retains
+	// the previous velocity and knockback does not
+	const verticalStrength = y + previousVelocity.y * 0.9;
+
+	// Apply the knockback
+	player.applyKnockback(
+		{
+			x: directionX * horizontalStrength,
+			z: directionZ * horizontalStrength,
+		},
+		verticalStrength,
+	);
+}
+
+/**
+ * Safely clears the velocity of an entity. This function exists because calling `clearVelocity` directly on a Player will result in an error.
+ * For players, a custom method is used to simulate velocity clearing.
+ * @param entity - The entity to clear the velocity of.
+ */
+export function clearVelocitySafe(entity: mc.Entity): void {
+	if (entity instanceof mc.Player) {
+		clearVelocityOfPlayer(entity);
+		return;
+	}
+
+	entity.clearVelocity();
+}
+
+/**
+ * Simulates clearing the velocity of a player by applying a knockback in the opposite direction of current velocity.
+ * This function exists because calling `clearVelocity` directly on a Player will result in an error.
+ * @param player - The player entity to clear the velocity of.
+ */
+export function clearVelocityOfPlayer(player: mc.Player) {
+	const { x, z } = player.getVelocity();
+
+	// Calculate the norm (magnitude) of the horizontal components (x and z)
+	const horizontalNorm = Math.sqrt(x * x + z * z);
+
+	// Calculate directionX and directionZ as normalized values
+	let directionX = 0;
+	let directionZ = 0;
+	if (horizontalNorm !== 0) {
+		directionX = -x / horizontalNorm;
+		directionZ = -z / horizontalNorm;
+	}
+
+	// Apply the knockback
+	player.applyKnockback(
+		{
+			x: directionX * horizontalNorm,
+			z: directionZ * horizontalNorm,
+		},
+		0,
+	);
 }
 
 /**
@@ -46,7 +144,7 @@ export function getNameRawText(entity: mc.Entity | string): mc.RawText {
 /**
  * Returns a RawText object with the translated name for a given entity type ID.
  * @param typeId - The entity type ID (e.g., "minecraft:zombie").
- * @returns {mc.RawText} A RawText object with the translation key for the entity name.
+ * @returns A RawText object with the translation key for the entity name.
  */
 function getTranslatableTypeId(typeId: string): mc.RawText {
 	const namespace = typeId.split(":")[0];
