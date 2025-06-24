@@ -1,0 +1,30 @@
+{
+	"compilerOptions": {
+		"target": "es2023",
+		"lib": ["es2023"],
+		"moduleDetection": "force",
+		"module": "nodenext",
+		"moduleResolution": "nodenext",
+		"rootDir": "src",
+		"resolveJsonModule": true,
+		"allowJs": true,
+		"checkJs": true,
+		"skipLibCheck": true,
+		"isolatedModules": true,
+		"verbatimModuleSyntax": true,
+		"forceConsistentCasingInFileNames": true,
+
+		"outDir": "dist",
+		"declaration": true,
+		"declarationMap": true,
+		"sourceMap": true,
+		"stripInternal": true,
+		"noEmitOnError": true,
+		"esModuleInterop": false,
+
+		"strict": true,
+		"noUncheckedIndexedAccess": true,
+		"noImplicitOverride": true
+	},
+	"include": ["src/**/*"]
+}

@@ -5,13 +5,17 @@
 	"author": "Lucked Coronet",
 	"license": "MIT",
 	"scripts": {
+		"postinstall": "tsc",
 		"test": "echo \"Error: no test specified\" && exit 1",
-		"format": "prettier --write ."
+		"format": "prettier --write .",
+		"types": "tsc --noEmit",
+		"build": "tsc"
 	},
 	"peerDependencies": {
 		"@minecraft/server": "^2.0.0"
 	},
 	"devDependencies": {
-		"prettier": "^3.6.0"
+		"prettier": "^3.6.0",
+		"typescript": "^5.8.3"
 	}
 }
