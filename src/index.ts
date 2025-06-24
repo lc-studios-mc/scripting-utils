@@ -2,6 +2,7 @@ export * as blockUtils from "./block.js";
 export * as damageUtils from "./damage.js";
 export * as directionUtils from "./direction.js";
 export * as entityUtils from "./entity.js";
+export * as eventEmitter from "./event-emitter.js";
 export * as console from "./console.js";
 export * as mathUtils from "./math.js";
 export { Vec3 } from "./vec3.js";
