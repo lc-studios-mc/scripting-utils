@@ -1,6 +1,6 @@
 {
 	"name": "@lc-studios-mc/scripting-utils",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"description": "Various utility functions for Minecraft Bedrock addon scripting.",
 	"author": "Lucked Coronet",
 	"license": "MIT",
@@ -15,7 +15,7 @@
 		}
 	},
 	"scripts": {
-		"postinstall": "tsc",
+		"prepare": "tsc",
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"format": "prettier --write .",
 		"types": "tsc --noEmit",
