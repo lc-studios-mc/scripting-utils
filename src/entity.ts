@@ -18,12 +18,14 @@ export function isAlive(entity: mc.Entity): boolean {
  * @param vector - The impulse vector to apply.
  */
 export function applyImpulseSafe(entity: mc.Entity, vector: mc.Vector3): void {
-	if (entity instanceof mc.Player) {
-		applyImpulseToPlayer(entity, vector);
-		return;
-	}
+	try {
+		if (entity instanceof mc.Player) {
+			applyImpulseToPlayer(entity, vector);
+			return;
+		}
 
-	entity.applyImpulse(vector);
+		entity.applyImpulse(vector);
+	} catch {}
 }
 
 /**
@@ -72,12 +74,14 @@ export function applyImpulseToPlayer(player: mc.Player, vector: mc.Vector3): voi
  * @param entity - The entity to clear the velocity of.
  */
 export function clearVelocitySafe(entity: mc.Entity): void {
-	if (entity instanceof mc.Player) {
-		clearVelocityOfPlayer(entity);
-		return;
-	}
+	try {
+		if (entity instanceof mc.Player) {
+			clearVelocityOfPlayer(entity);
+			return;
+		}
 
-	entity.clearVelocity();
+		entity.clearVelocity();
+	} catch {}
 }
 
 /**
