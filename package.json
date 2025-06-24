@@ -1,0 +1,13 @@
+{
+  "name": "@lc-studios-mc/scripting-utils",
+  "version": "0.0.1",
+  "description": "Various utility functions for Minecraft Bedrock addon scripting.",
+  "author": "Lucked Coronet",
+  "license": "MIT",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "peerDependencies": {
+    "@minecraft/server": "^2.0.0"
+  }
+}
