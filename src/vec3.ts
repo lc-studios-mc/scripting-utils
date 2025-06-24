@@ -593,8 +593,12 @@ export class Vec3 implements Vector3 {
 	 * Creates a new Vec3 instance.
 	 * @param base - The base vector to initialize with (default is Vec3.zero).
 	 */
-	constructor(base = Vec3.zero) {
-		this._vec = base;
+	constructor(base?: Partial<Vector3>) {
+		this._vec = {
+			x: Number(base?.x),
+			y: Number(base?.y),
+			z: Number(base?.z),
+		};
 	}
 
 	/**
