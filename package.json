@@ -1,6 +1,6 @@
 {
 	"name": "@lc-studios-mc/scripting-utils",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"description": "Various utility functions for Minecraft Bedrock addon scripting.",
 	"author": "Lucked Coronet",
 	"license": "MIT",
