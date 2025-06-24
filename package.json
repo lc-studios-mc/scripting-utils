@@ -4,6 +4,16 @@
 	"description": "Various utility functions for Minecraft Bedrock addon scripting.",
 	"author": "Lucked Coronet",
 	"license": "MIT",
+	"files": [
+		"dist",
+		"src"
+	],
+	"type": "module",
+	"exports": {
+		".": {
+			"default": "./dist/index.js"
+		}
+	},
 	"scripts": {
 		"postinstall": "tsc",
 		"test": "echo \"Error: no test specified\" && exit 1",
