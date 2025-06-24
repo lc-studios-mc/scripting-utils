@@ -11,6 +11,10 @@ importers:
       '@minecraft/server':
         specifier: ^2.0.0
         version: 2.0.0(@minecraft/vanilla-data@1.21.90)
+    devDependencies:
+      prettier:
+        specifier: ^3.6.0
+        version: 3.6.0
 
 packages:
 
@@ -25,6 +29,11 @@ packages:
   '@minecraft/vanilla-data@1.21.90':
     resolution: {integrity: sha512-Ca983n2C4mYWb3X+f73k4jCzxnBoxh88VQD4o8wfHbTFujpkO/RCWkvRWSE7fGBxrLF391OvRigKONGJ6SreJQ==}
 
+  prettier@3.6.0:
+    resolution: {integrity: sha512-ujSB9uXHJKzM/2GBuE0hBOUgC77CN3Bnpqa+g80bkv3T3A93wL/xlzDATHhnhkzifz/UE2SNOvmbTz5hSkDlHw==}
+    engines: {node: '>=14'}
+    hasBin: true
+
 snapshots:
 
   '@minecraft/common@1.2.0': {}
@@ -35,3 +44,5 @@ snapshots:
       '@minecraft/vanilla-data': 1.21.90
 
   '@minecraft/vanilla-data@1.21.90': {}
+
+  prettier@3.6.0: {}

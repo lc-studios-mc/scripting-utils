@@ -1,0 +1,10 @@
+{
+	"[markdown]": {
+		"editor.insertSpaces": true,
+		"editor.tabSize": 2
+	},
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"editor.formatOnSave": true,
+	"editor.insertSpaces": true,
+	"files.eol": "\n"
+}
