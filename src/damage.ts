@@ -45,13 +45,13 @@ export function calculateFinalDamage(
 	const enchantmentReductionPercentage = calculateEnchantmentReduction(damageCause, armors);
 	finalDamage *= 1 - enchantmentReductionPercentage;
 
+	// Ensure at least 1 damage point (0.5 hearts) is taken.
+	// This prevents true invulnerability from combined armor/enchantments alone.
+	finalDamage = Math.max(1, finalDamage);
+
 	// Apply Resistance Effect Reduction
 	const resistanceReductionPercentage = calculateResistanceReduction(entity);
 	finalDamage *= 1 - resistanceReductionPercentage;
-
-	// If the raw damage was positive, ensure at least 1 damage point (0.5 hearts) is taken.
-	// This prevents true invulnerability from combined armor/enchantments alone.
-	finalDamage = Math.max(1, finalDamage);
 
 	return finalDamage;
 }
