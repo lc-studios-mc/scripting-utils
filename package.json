@@ -15,7 +15,7 @@
 		}
 	},
 	"scripts": {
-		"postinstall": "tsc",
+		"prepare": "tsc",
 		"test": "echo \"Error: no test specified\" && exit 1",
 		"format": "prettier --write .",
 		"types": "tsc --noEmit",
