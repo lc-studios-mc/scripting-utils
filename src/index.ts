@@ -5,4 +5,5 @@ export * as directionUtils from "./direction.js";
 export * as entityUtils from "./entity.js";
 export * as eventEmitter from "./event-emitter.js";
 export * as mathUtils from "./math.js";
+export * as miscUtils from "./misc.js";
 export { Vec3 } from "./vec3.js";
