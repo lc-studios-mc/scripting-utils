@@ -6,4 +6,5 @@ export * as entityUtils from "./entity.js";
 export * as eventEmitter from "./event-emitter.js";
 export * as mathUtils from "./math.js";
 export * as miscUtils from "./misc.js";
+export * as playerUtils from "./player.js";
 export { Vec3 } from "./vec3.js";
