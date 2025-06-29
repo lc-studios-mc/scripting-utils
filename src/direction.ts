@@ -7,7 +7,7 @@ import { Vec3 } from "./vec3.js";
  * @param direction - Original direction.
  * @returns Reversed version of `direction`.
  */
-export function reverse(direction: mc.Direction): mc.Direction {
+export function reverseDirection(direction: mc.Direction): mc.Direction {
 	switch (direction) {
 		case mc.Direction.Up:
 			return mc.Direction.Down;
@@ -32,7 +32,7 @@ export function reverse(direction: mc.Direction): mc.Direction {
  * @param cardinalDirection - The cardinal direction (default North).
  * @returns The relative location vector.
  */
-export function getRelativeLocation(
+export function getRelativeLocationAtDirection(
 	origin: mc.Vector3,
 	relative: mc.Vector3,
 	cardinalDirection = mc.Direction.North,

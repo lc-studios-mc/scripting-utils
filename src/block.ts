@@ -4,7 +4,7 @@ import * as mc from "@minecraft/server";
  * Destroys a block by running the `setblock` command with `destroy` flag set to true.
  * @param block - The block to destroy.
  */
-export function destroy(block: mc.Block): void {
+export function destroyBlock(block: mc.Block): void {
 	const location = `${block.x} ${block.y} ${block.z}`;
 	block.dimension.runCommand(`setblock ${location} air destroy`);
 }
@@ -17,7 +17,7 @@ export function destroy(block: mc.Block): void {
  * @param steps - The number of steps to move in the specified direction (default is 1).
  * @returns The block at the relative position, could be undefined.
  */
-export function getRelativeAtDirection(
+export function getRelativeBlockAtDirection(
 	origin: mc.Block,
 	direction: mc.Direction,
 	steps = 1,
@@ -44,7 +44,9 @@ export function getRelativeAtDirection(
  * @param permutation - Block permutation.
  * @returns Direction, undefined if the state does not exist.
  */
-export function getCardinalDirection(permutation: mc.BlockPermutation): mc.Direction | undefined {
+export function getBlockCardinalDirection(
+	permutation: mc.BlockPermutation,
+): mc.Direction | undefined {
 	const blockDir = permutation.getState("minecraft:cardinal_direction");
 
 	switch (blockDir) {
@@ -66,7 +68,7 @@ export function getCardinalDirection(permutation: mc.BlockPermutation): mc.Direc
  * @param permutation - Block permutation.
  * @returns Direction, undefined if the state does not exist.
  */
-export function getFaceDirection(permutation: mc.BlockPermutation): mc.Direction | undefined {
+export function getBlockFace(permutation: mc.BlockPermutation): mc.Direction | undefined {
 	const blockDir = permutation.getState("minecraft:block_face");
 
 	switch (blockDir) {
