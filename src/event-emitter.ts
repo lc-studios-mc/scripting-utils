@@ -1,41 +1,10 @@
 import { console } from "./index.js";
 
 /**
- * Type definitions for event handlers
- */
-export type EventHandler<T = any, R = void> = (data: T) => R | Promise<R>;
-export type EventMap = Record<string, any>;
-export type ReturnTypeMap = Record<string, any>;
-
-/**
- * Options for event subscription
- */
-export interface SubscriptionOptions {
-	/** Run the handler only once, then automatically unsubscribe */
-	once?: boolean;
-	/** Priority of the handler (higher numbers execute first) */
-	priority?: number;
-}
-
-/**
- * Subscription object returned when subscribing to an event
- */
-export interface Subscription {
-	/** Unsubscribe from the event */
-	unsubscribe: () => void;
-	/** Pause the subscription temporarily */
-	pause: () => void;
-	/** Resume a paused subscription */
-	resume: () => void;
-	/** Check if subscription is currently active */
-	isActive: () => boolean;
-}
-
-/**
  * Internal representation of a subscriber
  */
 interface Subscriber<T = any, R = any> {
-	handler: EventHandler<T, R>;
+	handler: EventEmitter.EventHandler<T, R>;
 	once: boolean;
 	priority: number;
 	active: boolean;
@@ -85,9 +54,9 @@ interface Subscriber<T = any, R = any> {
  * // Unsubscribe
  * sub.unsubscribe();
  */
-export class EventEmitter<
-	Events extends EventMap = Record<string, any>,
-	Returns extends ReturnTypeMap = Record<keyof Events, void>,
+class EventEmitter<
+	Events extends EventEmitter.EventMap = Record<string, any>,
+	Returns extends EventEmitter.ReturnTypeMap = Record<keyof Events, void>,
 > {
 	private subscribers: Map<keyof Events, Subscriber[]> = new Map();
 	private idCounter: number = 0;
@@ -103,9 +72,9 @@ export class EventEmitter<
 	 */
 	public on<K extends keyof Events & keyof Returns>(
 		eventName: K,
-		handler: EventHandler<Events[K], Returns[K]>,
-		options: SubscriptionOptions = {},
-	): Subscription {
+		handler: EventEmitter.EventHandler<Events[K], Returns[K]>,
+		options: EventEmitter.SubscriptionOptions = {},
+	): EventEmitter.Subscription {
 		const { once = false, priority = 0 } = options;
 		const id = this.idCounter++;
 
@@ -148,9 +117,9 @@ export class EventEmitter<
 	 */
 	public once<K extends keyof Events & keyof Returns>(
 		eventName: K,
-		handler: EventHandler<Events[K], Returns[K]>,
+		handler: EventEmitter.EventHandler<Events[K], Returns[K]>,
 		priority = 0,
-	): Subscription {
+	): EventEmitter.Subscription {
 		return this.on(eventName, handler, { once: true, priority });
 	}
 
@@ -352,3 +321,38 @@ export class EventEmitter<
 		}
 	}
 }
+
+namespace EventEmitter {
+	/**
+	 * Type definitions for event handlers
+	 */
+	export type EventHandler<T = any, R = void> = (data: T) => R | Promise<R>;
+	export type EventMap = Record<string, any>;
+	export type ReturnTypeMap = Record<string, any>;
+
+	/**
+	 * Options for event subscription
+	 */
+	export interface SubscriptionOptions {
+		/** Run the handler only once, then automatically unsubscribe */
+		once?: boolean;
+		/** Priority of the handler (higher numbers execute first) */
+		priority?: number;
+	}
+
+	/**
+	 * Subscription object returned when subscribing to an event
+	 */
+	export interface Subscription {
+		/** Unsubscribe from the event */
+		unsubscribe: () => void;
+		/** Pause the subscription temporarily */
+		pause: () => void;
+		/** Resume a paused subscription */
+		resume: () => void;
+		/** Check if subscription is currently active */
+		isActive: () => boolean;
+	}
+}
+
+export { EventEmitter };
