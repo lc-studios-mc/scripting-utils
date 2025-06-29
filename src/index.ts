@@ -1,11 +1,26 @@
-export * as blockUtils from "./block.js";
-export * as console from "./console.js";
-export * as damageUtils from "./damage.js";
-export * as directionUtils from "./direction.js";
-export * as entityUtils from "./entity.js";
-export * as eventEmitter from "./event-emitter.js";
-export * as mathUtils from "./math.js";
-export * as miscUtils from "./misc.js";
-export * as playerUtils from "./player.js";
-export * as timeline from "./timeline.js";
-export { Vec3 } from "./vec3.js";
+import * as block from "./block.js";
+import * as console from "./console.js";
+import * as damage from "./damage.js";
+import * as direction from "./direction.js";
+import * as entity from "./entity.js";
+import * as eventEmitter from "./event-emitter.js";
+import * as math from "./math.js";
+import * as misc from "./misc.js";
+import * as player from "./player.js";
+import * as timeline from "./timeline.js";
+import * as vec3 from "./vec3.js";
+
+const utils = {
+	...block,
+	...damage,
+	...direction,
+	...entity,
+	...eventEmitter,
+	...math,
+	...misc,
+	...player,
+	...timeline,
+	...vec3,
+};
+
+export { utils, console };
