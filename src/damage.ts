@@ -2,7 +2,8 @@ import * as mc from "@minecraft/server";
 
 /**
  * Calculates the final damage an entity will take after applying armor, enchantment, and resistance reductions.
- * Ensures at least 1 damage point is dealt if the raw damage is positive, preventing full invulnerability from reductions.
+ * Ensures at least 1 damage point is dealt if the raw damage is positive, preventing full invulnerability from
+ * reductions. (Except a level 5 or higher Resistance effect)
  *
  * Particularly useful when you want to apply damage of a cause that penetrates hit immunity (e.g. `override`), but still
  * take armor and other defensive properties into account. (Example below)

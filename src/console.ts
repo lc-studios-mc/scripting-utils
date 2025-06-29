@@ -1,12 +1,4 @@
 /**
- * @module Console
- * @description A type-safe wrapper for the global `console` object.
- * This module provides functions that map directly to the `console` methods,
- * allowing them to be used in environments where the `console` type definition
- * may not be available at compile time.
- */
-
-/**
  * Outputs a message to the console.
  * @param data - A list of JavaScript objects to output. The string representations
  * of each of these objects are appended together in the order listed and output.

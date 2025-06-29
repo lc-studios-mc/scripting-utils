@@ -1,11 +1,36 @@
-export * as blockUtils from "./block.js";
-export * as console from "./console.js";
-export * as damageUtils from "./damage.js";
-export * as directionUtils from "./direction.js";
-export * as entityUtils from "./entity.js";
-export * as eventEmitter from "./event-emitter.js";
-export * as mathUtils from "./math.js";
-export * as miscUtils from "./misc.js";
-export * as playerUtils from "./player.js";
-export * as timeline from "./timeline.js";
-export { Vec3 } from "./vec3.js";
+import * as block from "./block.js";
+import * as console from "./console.js";
+import * as damage from "./damage.js";
+import * as direction from "./direction.js";
+import * as entity from "./entity.js";
+import { EventEmitter } from "./event-emitter.js";
+import * as math from "./math.js";
+import * as misc from "./misc.js";
+import * as player from "./player.js";
+import { Timeline } from "./timeline.js";
+import { Vec3 } from "./vec3.js";
+
+const utils = {
+	...block,
+	...damage,
+	...direction,
+	...entity,
+	...math,
+	...misc,
+	...player,
+};
+
+export {
+	/**
+	 * A type-safe wrapper for the global `console` object.
+	 * This module provides functions that map directly to the `console` methods,
+	 * allowing them to be used in environments where the `console` type definition
+	 * may not be available at compile time.
+	 */
+	console,
+	EventEmitter,
+	Timeline,
+	/** This module provides many utility functions. */
+	utils,
+	Vec3,
+};

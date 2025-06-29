@@ -1,41 +1,10 @@
 import { console } from "./index.js";
 
 /**
- * Type definitions for event handlers
- */
-export type EventHandler<T = any, R = void> = (data: T) => R | Promise<R>;
-export type EventMap = Record<string, any>;
-export type ReturnTypeMap = Record<string, any>;
-
-/**
- * Options for event subscription
- */
-export interface SubscriptionOptions {
-	/** Run the handler only once, then automatically unsubscribe */
-	once?: boolean;
-	/** Priority of the handler (higher numbers execute first) */
-	priority?: number;
-}
-
-/**
- * Subscription object returned when subscribing to an event
- */
-export interface Subscription {
-	/** Unsubscribe from the event */
-	unsubscribe: () => void;
-	/** Pause the subscription temporarily */
-	pause: () => void;
-	/** Resume a paused subscription */
-	resume: () => void;
-	/** Check if subscription is currently active */
-	isActive: () => boolean;
-}
-
-/**
  * Internal representation of a subscriber
  */
 interface Subscriber<T = any, R = any> {
-	handler: EventHandler<T, R>;
+	handler: EventEmitter.EventHandler<T, R>;
 	once: boolean;
 	priority: number;
 	active: boolean;
@@ -85,12 +54,15 @@ interface Subscriber<T = any, R = any> {
  * // Unsubscribe
  * sub.unsubscribe();
  */
-export class EventEmitter<
-	Events extends EventMap = Record<string, any>,
-	Returns extends ReturnTypeMap = Record<keyof Events, void>,
+class EventEmitter<
+	Events extends EventEmitter.EventMap = Record<string, any>,
+	Returns extends EventEmitter.ReturnTypeMap<Events> = Record<keyof Events, void>,
 > {
 	private subscribers: Map<keyof Events, Subscriber[]> = new Map();
 	private idCounter: number = 0;
+	private isEmitting: Set<keyof Events> = new Set();
+	private emissionStack: (keyof Events)[] = [];
+	private maxEmissionDepth: number = 100;
 
 	constructor(private onError: (error: unknown) => void = (e) => console.error(e)) {}
 
@@ -101,11 +73,11 @@ export class EventEmitter<
 	 * @param options - Subscription options
 	 * @returns Subscription object for controlling the subscription
 	 */
-	public on<K extends keyof Events & keyof Returns>(
+	public on<K extends keyof Events>(
 		eventName: K,
-		handler: EventHandler<Events[K], Returns[K]>,
-		options: SubscriptionOptions = {},
-	): Subscription {
+		handler: EventEmitter.EventHandler<Events[K], Returns[K]>,
+		options: EventEmitter.SubscriptionOptions = {},
+	): EventEmitter.Subscription {
 		const { once = false, priority = 0 } = options;
 		const id = this.idCounter++;
 
@@ -123,13 +95,31 @@ export class EventEmitter<
 
 		const eventSubscribers = this.subscribers.get(eventName)!;
 
-		// Insert based on priority (higher priority first)
-		let insertIndex = eventSubscribers.findIndex((sub) => sub.priority < priority);
-		if (insertIndex === -1) {
-			insertIndex = eventSubscribers.length;
-		}
+		// Use binary search for better performance with many subscribers
+		if (eventSubscribers.length === 0) {
+			eventSubscribers.push(subscriber);
+		} else if (priority <= eventSubscribers[eventSubscribers.length - 1]!.priority) {
+			// Common case: insert at end
+			eventSubscribers.push(subscriber);
+		} else if (priority > eventSubscribers[0]!.priority) {
+			// Insert at beginning
+			eventSubscribers.unshift(subscriber);
+		} else {
+			// Binary search for insertion point
+			let left = 0;
+			let right = eventSubscribers.length - 1;
 
-		eventSubscribers.splice(insertIndex, 0, subscriber);
+			while (left <= right) {
+				const mid = Math.floor((left + right) / 2);
+				if (eventSubscribers[mid]!.priority >= priority) {
+					left = mid + 1;
+				} else {
+					right = mid - 1;
+				}
+			}
+
+			eventSubscribers.splice(left, 0, subscriber);
+		}
 
 		return {
 			unsubscribe: () => this.off(eventName, id),
@@ -146,100 +136,164 @@ export class EventEmitter<
 	 * @param priority - Priority of the handler (higher numbers execute first)
 	 * @returns Subscription object for controlling the subscription
 	 */
-	public once<K extends keyof Events & keyof Returns>(
+	public once<K extends keyof Events>(
 		eventName: K,
-		handler: EventHandler<Events[K], Returns[K]>,
+		handler: EventEmitter.EventHandler<Events[K], Returns[K]>,
 		priority = 0,
-	): Subscription {
+	): EventEmitter.Subscription {
 		return this.on(eventName, handler, { once: true, priority });
 	}
 
 	/**
-	 * Emit an event synchronously and collect results
+	 * Emit an event synchronously and collect results.
+	 *
+	 * Note: If any registered handlers are `async` or return a `Promise`, the returned array
+	 * will contain `Promise` objects for those handlers instead of their resolved values.
+	 * For robust handling of async logic, use `emitAsync`.
+	 *
 	 * @param eventName - Name of the event to emit
 	 * @param data - Data to pass to handlers
-	 * @returns Array of results from all handlers
+	 * @returns Array of results from all handlers.
 	 */
-	public emit<K extends keyof Events & keyof Returns>(eventName: K, data: Events[K]): Returns[K][] {
-		if (!this.subscribers.has(eventName)) {
+	public emit<K extends keyof Events>(eventName: K, data: Events[K]): Returns[K][] {
+		const subscribers = this.subscribers.get(eventName);
+		if (!subscribers || subscribers.length === 0) {
 			return [];
 		}
 
-		const subscribers = this.subscribers.get(eventName)!;
+		// Prevent direct and indirect recursive emissions
+		if (this.isEmitting.has(eventName)) {
+			this.safeOnError(
+				new Error(`Direct recursive emission detected for event: ${String(eventName)}`),
+			);
+			return [];
+		}
+
+		// Check for indirect recursion (cyclical emissions)
+		if (this.emissionStack.length >= this.maxEmissionDepth) {
+			this.safeOnError(
+				new Error(
+					`Maximum emission depth exceeded. Possible cyclical emission involving: ${this.emissionStack.map(String).join(" -> ")}`,
+				),
+			);
+			return [];
+		}
+
+		this.isEmitting.add(eventName);
+		this.emissionStack.push(eventName);
 		const toRemove: number[] = [];
 		const results: Returns[K][] = [];
 
-		// Create a copy to avoid issues if handlers modify the subscribers array
-		const activeSubscribers = [...subscribers].filter((sub) => sub.active);
+		try {
+			// Create a snapshot to prevent modification during iteration
+			const activeSubscribers = subscribers.filter((sub) => sub.active);
 
-		for (const subscriber of activeSubscribers) {
-			try {
-				const result = subscriber.handler(data) as Returns[K];
-				results.push(result);
-			} catch (error) {
-				this.onError(error);
+			for (const subscriber of activeSubscribers) {
+				try {
+					const result = subscriber.handler(data) as Returns[K];
+					results.push(result);
+				} catch (error) {
+					this.safeOnError(error);
+				}
+
+				if (subscriber.once) {
+					toRemove.push(subscriber.id);
+				}
 			}
 
-			if (subscriber.once) {
-				toRemove.push(subscriber.id);
-			}
-		}
-
-		// Remove 'once' subscribers
-		if (toRemove.length > 0) {
-			this.subscribers.set(
-				eventName,
-				subscribers.filter((sub) => !toRemove.includes(sub.id)),
-			);
+			// Clean up 'once' subscribers
+			this.cleanupOnceSubscribers(eventName, toRemove);
+		} finally {
+			this.isEmitting.delete(eventName);
+			this.emissionStack.pop();
 		}
 
 		return results;
 	}
 
 	/**
-	 * Emit an event with data and collect results, including from async handlers
+	 * Emit an event with data and collect results, including from async handlers.
+	 * This method ensures all handlers are executed, even if some fail.
 	 * @param eventName - Name of the event to emit
 	 * @param data - Data to pass to handlers
-	 * @returns Promise that resolves with an array of results from all handlers
+	 * @returns Promise that resolves with detailed results from all handlers.
 	 */
-	public async emitAsync<K extends keyof Events & keyof Returns>(
+	public async emitAsync<K extends keyof Events>(
 		eventName: K,
 		data: Events[K],
-	): Promise<Returns[K][]> {
-		if (!this.subscribers.has(eventName)) {
-			return [];
+	): Promise<EventEmitter.EmissionResult<Returns[K]>> {
+		const subscribers = this.subscribers.get(eventName);
+		if (!subscribers || subscribers.length === 0) {
+			return { successful: [], failed: [] };
 		}
 
-		const subscribers = this.subscribers.get(eventName)!;
-		const results: Array<Returns[K] | Promise<Returns[K]>> = [];
+		// Prevent direct and indirect recursive emissions
+		if (this.isEmitting.has(eventName)) {
+			this.safeOnError(
+				new Error(`Direct recursive emission detected for event: ${String(eventName)}`),
+			);
+			return { successful: [], failed: [] };
+		}
+
+		// Check for indirect recursion (cyclical emissions)
+		if (this.emissionStack.length >= this.maxEmissionDepth) {
+			this.safeOnError(
+				new Error(
+					`Maximum emission depth exceeded. Possible cyclical emission involving: ${this.emissionStack.map(String).join(" -> ")}`,
+				),
+			);
+			return { successful: [], failed: [] };
+		}
+
+		this.isEmitting.add(eventName);
+		this.emissionStack.push(eventName);
+		const handlerPromises: Array<Promise<Returns[K]>> = [];
 		const toRemove: number[] = [];
 
-		// Create a copy to avoid issues if handlers modify the subscribers array
-		const activeSubscribers = [...subscribers].filter((sub) => sub.active);
+		try {
+			// Create a snapshot to prevent modification during iteration
+			const activeSubscribers = subscribers.filter((sub) => sub.active);
 
-		for (const subscriber of activeSubscribers) {
-			try {
-				const result = subscriber.handler(data);
-				results.push(result);
-			} catch (error) {
-				this.onError(error);
+			for (const subscriber of activeSubscribers) {
+				if (subscriber.once) {
+					toRemove.push(subscriber.id);
+				}
+
+				// Wrap handler execution in async function for unified error handling
+				const handlerPromise = (async () => {
+					return await subscriber.handler(data);
+				})();
+
+				handlerPromises.push(handlerPromise);
 			}
 
-			if (subscriber.once) {
-				toRemove.push(subscriber.id);
+			// Clean up 'once' subscribers before awaiting
+			this.cleanupOnceSubscribers(eventName, toRemove);
+
+			const settledResults = await Promise.allSettled(handlerPromises);
+			const successful: Returns[K][] = [];
+			const failed: EventEmitter.HandlerError[] = [];
+
+			for (let i = 0; i < settledResults.length; i++) {
+				const result = settledResults[i]!;
+				if (result.status === "fulfilled") {
+					successful.push(result.value);
+				} else {
+					// A handler's promise was rejected.
+					const error: EventEmitter.HandlerError = {
+						error: result.reason,
+						handlerIndex: i,
+					};
+					failed.push(error);
+					this.safeOnError(result.reason);
+				}
 			}
-		}
 
-		// Remove 'once' subscribers
-		if (toRemove.length > 0) {
-			this.subscribers.set(
-				eventName,
-				subscribers.filter((sub) => !toRemove.includes(sub.id)),
-			);
+			return { successful, failed };
+		} finally {
+			this.isEmitting.delete(eventName);
+			this.emissionStack.pop();
 		}
-
-		// Wait for all results to resolve (whether they're promises or not)
-		return Promise.all(results);
 	}
 
 	/**
@@ -273,6 +327,8 @@ export class EventEmitter<
 	 */
 	public removeAllListeners(): void {
 		this.subscribers.clear();
+		this.isEmitting.clear();
+		this.emissionStack.length = 0;
 	}
 
 	/**
@@ -281,10 +337,18 @@ export class EventEmitter<
 	 * @returns Number of subscribers
 	 */
 	public listenerCount<K extends keyof Events>(eventName: K): number {
-		if (!this.subscribers.has(eventName)) {
-			return 0;
-		}
-		return this.subscribers.get(eventName)!.length;
+		const subscribers = this.subscribers.get(eventName);
+		return subscribers ? subscribers.length : 0;
+	}
+
+	/**
+	 * Get the number of active subscribers for a specific event
+	 * @param eventName - Name of the event
+	 * @returns Number of active subscribers
+	 */
+	public activeListenerCount<K extends keyof Events>(eventName: K): number {
+		const subscribers = this.subscribers.get(eventName);
+		return subscribers ? subscribers.filter((sub) => sub.active).length : 0;
 	}
 
 	/**
@@ -294,6 +358,47 @@ export class EventEmitter<
 	 */
 	public hasListeners<K extends keyof Events>(eventName: K): boolean {
 		return this.listenerCount(eventName) > 0;
+	}
+
+	/**
+	 * Check if an event has any active subscribers
+	 * @param eventName - Name of the event
+	 * @returns True if the event has active subscribers
+	 */
+	public hasActiveListeners<K extends keyof Events>(eventName: K): boolean {
+		return this.activeListenerCount(eventName) > 0;
+	}
+
+	/**
+	 * Get all event names that have subscribers
+	 * @returns Array of event names
+	 */
+	public eventNames(): (keyof Events)[] {
+		return Array.from(this.subscribers.keys());
+	}
+
+	/**
+	 * Get the current emission stack depth
+	 * @returns Current emission depth
+	 */
+	public getEmissionDepth(): number {
+		return this.emissionStack.length;
+	}
+
+	/**
+	 * Get the current emission stack
+	 * @returns Array of currently emitting events
+	 */
+	public getEmissionStack(): (keyof Events)[] {
+		return [...this.emissionStack];
+	}
+
+	/**
+	 * Set the maximum allowed emission depth
+	 * @param depth - Maximum emission depth (default: 100)
+	 */
+	public setMaxEmissionDepth(depth: number): void {
+		this.maxEmissionDepth = Math.max(1, depth);
 	}
 
 	/**
@@ -321,11 +426,7 @@ export class EventEmitter<
 	 * @returns True if the subscription is active
 	 */
 	private isSubscriptionActive<K extends keyof Events>(eventName: K, handlerId: number): boolean {
-		if (!this.subscribers.has(eventName)) {
-			return false;
-		}
-
-		const subscriber = this.subscribers.get(eventName)!.find((sub) => sub.id === handlerId);
+		const subscriber = this.subscribers.get(eventName)?.find((sub) => sub.id === handlerId);
 		return subscriber ? subscriber.active : false;
 	}
 
@@ -339,16 +440,111 @@ export class EventEmitter<
 		eventName: K,
 		handlerId: number,
 		active: boolean,
-	): void {
-		if (!this.subscribers.has(eventName)) {
-			return;
+	): boolean {
+		const eventSubscribers = this.subscribers.get(eventName);
+		if (!eventSubscribers) {
+			return false;
 		}
 
-		const eventSubscribers = this.subscribers.get(eventName)!;
 		const subscriber = eventSubscribers.find((sub) => sub.id === handlerId);
 
 		if (subscriber) {
 			subscriber.active = active;
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Safely call the error handler with error boundary protection
+	 * @param error - The error to handle
+	 */
+	private safeOnError(error: unknown): void {
+		try {
+			this.onError(error);
+		} catch (handlerError) {
+			// Fallback to console if the error handler itself throws
+			console.error("Error in error handler:", handlerError);
+			console.error("Original error:", error);
+		}
+	}
+
+	/**
+	 * Clean up once-only subscribers after emission
+	 * @param eventName - Name of the event
+	 * @param toRemove - Array of subscriber IDs to remove
+	 */
+	private cleanupOnceSubscribers<K extends keyof Events>(eventName: K, toRemove: number[]): void {
+		if (toRemove.length === 0) {
+			return;
+		}
+
+		const subscribers = this.subscribers.get(eventName);
+		if (!subscribers) {
+			return;
+		}
+
+		const filteredSubscribers = subscribers.filter((sub) => !toRemove.includes(sub.id));
+
+		if (filteredSubscribers.length === 0) {
+			this.subscribers.delete(eventName);
+		} else {
+			this.subscribers.set(eventName, filteredSubscribers);
 		}
 	}
 }
+
+namespace EventEmitter {
+	/**
+	 * Type definitions for event handlers
+	 */
+	export type EventHandler<T = any, R = void> = (data: T) => R | Promise<R>;
+	export type EventMap = Record<string, any>;
+	export type ReturnTypeMap<E extends EventMap> = Record<keyof E, any>;
+
+	/**
+	 * Options for event subscription
+	 */
+	export interface SubscriptionOptions {
+		/** Run the handler only once, then automatically unsubscribe */
+		once?: boolean;
+		/** Priority of the handler (higher numbers execute first) */
+		priority?: number;
+	}
+
+	/**
+	 * Subscription object returned when subscribing to an event
+	 */
+	export interface Subscription {
+		/** Unsubscribe from the event */
+		unsubscribe: () => void;
+		/** Pause the subscription temporarily */
+		pause: () => void;
+		/** Resume a paused subscription */
+		resume: () => void;
+		/** Check if subscription is currently active */
+		isActive: () => boolean;
+	}
+
+	/**
+	 * Information about a handler error
+	 */
+	export interface HandlerError {
+		/** The error that occurred */
+		error: unknown;
+		/** Index of the handler that failed */
+		handlerIndex: number;
+	}
+
+	/**
+	 * Result of an async emission
+	 */
+	export interface EmissionResult<T> {
+		/** Results from successful handlers */
+		successful: T[];
+		/** Information about failed handlers */
+		failed: HandlerError[];
+	}
+}
+
+export { EventEmitter };
