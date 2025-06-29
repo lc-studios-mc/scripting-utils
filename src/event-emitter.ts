@@ -124,17 +124,22 @@ class EventEmitter<
 	}
 
 	/**
-	 * Emit an event synchronously and collect results
+	 * Emit an event synchronously and collect results.
+	 *
+	 * Note: If any registered handlers are `async` or return a `Promise`, the returned array
+	 * will contain `Promise` objects for those handlers instead of their resolved values.
+	 * For robust handling of async logic, use `emitAsync`.
+	 *
 	 * @param eventName - Name of the event to emit
 	 * @param data - Data to pass to handlers
-	 * @returns Array of results from all handlers
+	 * @returns Array of results from all handlers.
 	 */
 	public emit<K extends keyof Events & keyof Returns>(eventName: K, data: Events[K]): Returns[K][] {
-		if (!this.subscribers.has(eventName)) {
+		const subscribers = this.subscribers.get(eventName);
+		if (!subscribers) {
 			return [];
 		}
 
-		const subscribers = this.subscribers.get(eventName)!;
 		const toRemove: number[] = [];
 		const results: Returns[K][] = [];
 
@@ -156,59 +161,73 @@ class EventEmitter<
 
 		// Remove 'once' subscribers
 		if (toRemove.length > 0) {
-			this.subscribers.set(
-				eventName,
-				subscribers.filter((sub) => !toRemove.includes(sub.id)),
-			);
+			const updatedSubscribers = subscribers.filter((sub) => !toRemove.includes(sub.id));
+			if (updatedSubscribers.length > 0) {
+				this.subscribers.set(eventName, updatedSubscribers);
+			} else {
+				this.subscribers.delete(eventName);
+			}
 		}
 
 		return results;
 	}
 
 	/**
-	 * Emit an event with data and collect results, including from async handlers
+	 * Emit an event with data and collect results, including from async handlers.
+	 * This method ensures all handlers are executed, even if some fail.
 	 * @param eventName - Name of the event to emit
 	 * @param data - Data to pass to handlers
-	 * @returns Promise that resolves with an array of results from all handlers
+	 * @returns Promise that resolves with an array of results from all successful handlers.
 	 */
 	public async emitAsync<K extends keyof Events & keyof Returns>(
 		eventName: K,
 		data: Events[K],
 	): Promise<Returns[K][]> {
-		if (!this.subscribers.has(eventName)) {
+		const originalSubscribers = this.subscribers.get(eventName);
+		if (!originalSubscribers) {
 			return [];
 		}
 
-		const subscribers = this.subscribers.get(eventName)!;
-		const results: Array<Returns[K] | Promise<Returns[K]>> = [];
+		const handlerPromises: Array<Promise<Returns[K]>> = [];
 		const toRemove: number[] = [];
-
-		// Create a copy to avoid issues if handlers modify the subscribers array
-		const activeSubscribers = [...subscribers].filter((sub) => sub.active);
+		// Create a copy to avoid issues if handlers modify the subscribers array during sync execution
+		const activeSubscribers = [...originalSubscribers].filter((sub) => sub.active);
 
 		for (const subscriber of activeSubscribers) {
-			try {
-				const result = subscriber.handler(data);
-				results.push(result);
-			} catch (error) {
-				this.onError(error);
-			}
-
 			if (subscriber.once) {
 				toRemove.push(subscriber.id);
 			}
+			try {
+				// Wrap in Promise.resolve to handle handlers that might not be async
+				handlerPromises.push(Promise.resolve(subscriber.handler(data)));
+			} catch (error) {
+				// Catch sync errors thrown by handlers
+				this.onError(error);
+			}
 		}
 
-		// Remove 'once' subscribers
 		if (toRemove.length > 0) {
-			this.subscribers.set(
-				eventName,
-				subscribers.filter((sub) => !toRemove.includes(sub.id)),
-			);
+			const updatedSubscribers = originalSubscribers.filter((sub) => !toRemove.includes(sub.id));
+			if (updatedSubscribers.length > 0) {
+				this.subscribers.set(eventName, updatedSubscribers);
+			} else {
+				this.subscribers.delete(eventName);
+			}
 		}
 
-		// Wait for all results to resolve (whether they're promises or not)
-		return Promise.all(results);
+		const settledResults = await Promise.allSettled(handlerPromises);
+		const successfulResults: Returns[K][] = [];
+
+		for (const result of settledResults) {
+			if (result.status === "fulfilled") {
+				successfulResults.push(result.value);
+			} else {
+				// A handler's promise was rejected.
+				this.onError(result.reason);
+			}
+		}
+
+		return successfulResults;
 	}
 
 	/**
@@ -290,11 +309,7 @@ class EventEmitter<
 	 * @returns True if the subscription is active
 	 */
 	private isSubscriptionActive<K extends keyof Events>(eventName: K, handlerId: number): boolean {
-		if (!this.subscribers.has(eventName)) {
-			return false;
-		}
-
-		const subscriber = this.subscribers.get(eventName)!.find((sub) => sub.id === handlerId);
+		const subscriber = this.subscribers.get(eventName)?.find((sub) => sub.id === handlerId);
 		return subscriber ? subscriber.active : false;
 	}
 
@@ -308,17 +323,19 @@ class EventEmitter<
 		eventName: K,
 		handlerId: number,
 		active: boolean,
-	): void {
-		if (!this.subscribers.has(eventName)) {
-			return;
+	): boolean {
+		const eventSubscribers = this.subscribers.get(eventName);
+		if (!eventSubscribers) {
+			return false;
 		}
 
-		const eventSubscribers = this.subscribers.get(eventName)!;
 		const subscriber = eventSubscribers.find((sub) => sub.id === handlerId);
 
 		if (subscriber) {
 			subscriber.active = active;
+			return true;
 		}
+		return false;
 	}
 }
 
