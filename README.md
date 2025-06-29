@@ -7,7 +7,7 @@ Does not depend on Beta APIs. Requires `@minecraft/server@^2.0.0` to be installe
 ## Install
 
 ```sh
-pnpm install github:lc-studios-mc/scripting-utils
+pnpm install github:lc-studios-mc/scripting-utils#semver:^1.0.0
 ```
 
 ## Usage example
