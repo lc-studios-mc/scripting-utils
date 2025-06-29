@@ -1,7 +1,7 @@
-export * as block from "./block.js";
-export * as damage from "./damage.js";
-export * as direction from "./direction.js";
-export * as entity from "./entity.js";
-export * as math from "./math.js";
-export * as misc from "./misc.js";
-export * as player from "./player.js";
+export * from "./block.js";
+export * from "./damage.js";
+export * from "./direction.js";
+export * from "./entity.js";
+export * from "./math.js";
+export * from "./misc.js";
+export * from "./player.js";
