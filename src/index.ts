@@ -7,8 +7,8 @@ import * as eventEmitter from "./event-emitter.js";
 import * as math from "./math.js";
 import * as misc from "./misc.js";
 import * as player from "./player.js";
-import * as timeline from "./timeline.js";
-import * as vec3 from "./vec3.js";
+import { Timeline } from "./timeline.js";
+import { Vec3 } from "./vec3.js";
 
 const utils = {
 	...block,
@@ -19,8 +19,6 @@ const utils = {
 	...math,
 	...misc,
 	...player,
-	...timeline,
-	...vec3,
 };
 
-export { utils, console };
+export { utils, console, Timeline, Vec3 };
