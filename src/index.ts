@@ -20,11 +20,17 @@ const utils = {
 	...player,
 };
 
-// prettier-ignore
 export {
+	/**
+	 * A type-safe wrapper for the global `console` object.
+	 * This module provides functions that map directly to the `console` methods,
+	 * allowing them to be used in environments where the `console` type definition
+	 * may not be available at compile time.
+	 */
 	console,
 	EventEmitter,
 	Timeline,
+	/** This module provides many utility functions. */
 	utils,
 	Vec3,
 };
