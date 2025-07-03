@@ -31,3 +31,32 @@ export function randi(min: number, max: number): number {
 export function randf(min: number, max: number): number {
 	return Math.random() * (max - min) + min;
 }
+
+/** Represents a numeric range with minimum and maximum values. */
+export type Range = { min: number; max: number };
+
+/**
+ * Resolves a float value from a number or a Range.
+ * If a number is provided, returns it as-is.
+ * If a Range is provided, returns a random float between min and max.
+ *
+ * @param range - A number or a Range object
+ * @returns A float value
+ */
+export function resolveRangeFloat(range: number | Range): number {
+	if (typeof range === "number") return range;
+	return randf(range.min, range.max);
+}
+
+/**
+ * Resolves an integer value from a number or a Range.
+ * If a number is provided, returns its floored value.
+ * If a Range is provided, returns a random integer between min and max.
+ *
+ * @param range - A number or a Range object
+ * @returns An integer value
+ */
+export function resolveRangeInt(range: number | Range): number {
+	if (typeof range === "number") return Math.floor(range);
+	return randi(range.min, range.max);
+}
