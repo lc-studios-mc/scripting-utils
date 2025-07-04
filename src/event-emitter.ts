@@ -1,10 +1,61 @@
 import { console } from "./index.js";
 
 /**
+ * Type definitions for event handlers
+ */
+export type EventHandler<T = any, R = void> = (data: T) => R | Promise<R>;
+export type EventMap = Record<string, any>;
+export type EventReturnTypeMap<E extends EventMap> = Record<keyof E, any>;
+
+/**
+ * Options for event subscription
+ */
+export interface EventEmitterSubscribeOptions {
+	/** Run the handler only once, then automatically unsubscribe */
+	once?: boolean;
+	/** Priority of the handler (higher numbers execute first) */
+	priority?: number;
+}
+
+/**
+ * Subscription object returned when subscribing to an event
+ */
+export interface EventSubscription {
+	/** Unsubscribe from the event */
+	unsubscribe: () => void;
+	/** Pause the subscription temporarily */
+	pause: () => void;
+	/** Resume a paused subscription */
+	resume: () => void;
+	/** Check if subscription is currently active */
+	isActive: () => boolean;
+}
+
+/**
+ * Information about a handler error
+ */
+export interface EventEmissionError {
+	/** The error that occurred */
+	error: unknown;
+	/** Index of the handler that failed */
+	handlerIndex: number;
+}
+
+/**
+ * Result of an async emission
+ */
+export interface AsyncEventEmissionResult<T> {
+	/** Results from successful handlers */
+	successful: T[];
+	/** Information about failed handlers */
+	failed: EventEmissionError[];
+}
+
+/**
  * Internal representation of a subscriber
  */
-interface Subscriber<T = any, R = any> {
-	handler: EventEmitter.EventHandler<T, R>;
+interface InternalSubscriber<T = any, R = any> {
+	handler: EventHandler<T, R>;
 	once: boolean;
 	priority: number;
 	active: boolean;
@@ -54,11 +105,11 @@ interface Subscriber<T = any, R = any> {
  * // Unsubscribe
  * sub.unsubscribe();
  */
-class EventEmitter<
-	Events extends EventEmitter.EventMap = Record<string, any>,
-	Returns extends EventEmitter.ReturnTypeMap<Events> = Record<keyof Events, void>,
+export class EventEmitter<
+	Events extends EventMap = Record<string, any>,
+	EventReturns extends EventReturnTypeMap<Events> = Record<keyof Events, void>,
 > {
-	private subscribers: Map<keyof Events, Subscriber[]> = new Map();
+	private subscribers: Map<keyof Events, InternalSubscriber[]> = new Map();
 	private idCounter: number = 0;
 	private isEmitting: Set<keyof Events> = new Set();
 	private emissionStack: (keyof Events)[] = [];
@@ -75,13 +126,13 @@ class EventEmitter<
 	 */
 	public on<K extends keyof Events>(
 		eventName: K,
-		handler: EventEmitter.EventHandler<Events[K], Returns[K]>,
-		options: EventEmitter.SubscriptionOptions = {},
-	): EventEmitter.Subscription {
+		handler: EventHandler<Events[K], EventReturns[K]>,
+		options: EventEmitterSubscribeOptions = {},
+	): EventSubscription {
 		const { once = false, priority = 0 } = options;
 		const id = this.idCounter++;
 
-		const subscriber: Subscriber<Events[K], Returns[K]> = {
+		const subscriber: InternalSubscriber<Events[K], EventReturns[K]> = {
 			handler,
 			once,
 			priority,
@@ -138,9 +189,9 @@ class EventEmitter<
 	 */
 	public once<K extends keyof Events>(
 		eventName: K,
-		handler: EventEmitter.EventHandler<Events[K], Returns[K]>,
+		handler: EventHandler<Events[K], EventReturns[K]>,
 		priority = 0,
-	): EventEmitter.Subscription {
+	): EventSubscription {
 		return this.on(eventName, handler, { once: true, priority });
 	}
 
@@ -155,7 +206,7 @@ class EventEmitter<
 	 * @param data - Data to pass to handlers
 	 * @returns Array of results from all handlers.
 	 */
-	public emit<K extends keyof Events>(eventName: K, data: Events[K]): Returns[K][] {
+	public emit<K extends keyof Events>(eventName: K, data: Events[K]): EventReturns[K][] {
 		const subscribers = this.subscribers.get(eventName);
 		if (!subscribers || subscribers.length === 0) {
 			return [];
@@ -182,7 +233,7 @@ class EventEmitter<
 		this.isEmitting.add(eventName);
 		this.emissionStack.push(eventName);
 		const toRemove: number[] = [];
-		const results: Returns[K][] = [];
+		const results: EventReturns[K][] = [];
 
 		try {
 			// Create a snapshot to prevent modification during iteration
@@ -190,7 +241,7 @@ class EventEmitter<
 
 			for (const subscriber of activeSubscribers) {
 				try {
-					const result = subscriber.handler(data) as Returns[K];
+					const result = subscriber.handler(data) as EventReturns[K];
 					results.push(result);
 				} catch (error) {
 					this.safeOnError(error);
@@ -221,7 +272,7 @@ class EventEmitter<
 	public async emitAsync<K extends keyof Events>(
 		eventName: K,
 		data: Events[K],
-	): Promise<EventEmitter.EmissionResult<Returns[K]>> {
+	): Promise<AsyncEventEmissionResult<EventReturns[K]>> {
 		const subscribers = this.subscribers.get(eventName);
 		if (!subscribers || subscribers.length === 0) {
 			return { successful: [], failed: [] };
@@ -247,7 +298,7 @@ class EventEmitter<
 
 		this.isEmitting.add(eventName);
 		this.emissionStack.push(eventName);
-		const handlerPromises: Array<Promise<Returns[K]>> = [];
+		const handlerPromises: Array<Promise<EventReturns[K]>> = [];
 		const toRemove: number[] = [];
 
 		try {
@@ -271,8 +322,8 @@ class EventEmitter<
 			this.cleanupOnceSubscribers(eventName, toRemove);
 
 			const settledResults = await Promise.allSettled(handlerPromises);
-			const successful: Returns[K][] = [];
-			const failed: EventEmitter.HandlerError[] = [];
+			const successful: EventReturns[K][] = [];
+			const failed: EventEmissionError[] = [];
 
 			for (let i = 0; i < settledResults.length; i++) {
 				const result = settledResults[i]!;
@@ -280,7 +331,7 @@ class EventEmitter<
 					successful.push(result.value);
 				} else {
 					// A handler's promise was rejected.
-					const error: EventEmitter.HandlerError = {
+					const error: EventEmissionError = {
 						error: result.reason,
 						handlerIndex: i,
 					};
@@ -493,58 +544,3 @@ class EventEmitter<
 		}
 	}
 }
-
-namespace EventEmitter {
-	/**
-	 * Type definitions for event handlers
-	 */
-	export type EventHandler<T = any, R = void> = (data: T) => R | Promise<R>;
-	export type EventMap = Record<string, any>;
-	export type ReturnTypeMap<E extends EventMap> = Record<keyof E, any>;
-
-	/**
-	 * Options for event subscription
-	 */
-	export interface SubscriptionOptions {
-		/** Run the handler only once, then automatically unsubscribe */
-		once?: boolean;
-		/** Priority of the handler (higher numbers execute first) */
-		priority?: number;
-	}
-
-	/**
-	 * Subscription object returned when subscribing to an event
-	 */
-	export interface Subscription {
-		/** Unsubscribe from the event */
-		unsubscribe: () => void;
-		/** Pause the subscription temporarily */
-		pause: () => void;
-		/** Resume a paused subscription */
-		resume: () => void;
-		/** Check if subscription is currently active */
-		isActive: () => boolean;
-	}
-
-	/**
-	 * Information about a handler error
-	 */
-	export interface HandlerError {
-		/** The error that occurred */
-		error: unknown;
-		/** Index of the handler that failed */
-		handlerIndex: number;
-	}
-
-	/**
-	 * Result of an async emission
-	 */
-	export interface EmissionResult<T> {
-		/** Results from successful handlers */
-		successful: T[];
-		/** Information about failed handlers */
-		failed: HandlerError[];
-	}
-}
-
-export { EventEmitter };
