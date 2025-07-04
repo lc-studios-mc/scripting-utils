@@ -6,7 +6,7 @@
  * @param epsilon - The maximum allowed difference for the numbers to be considered equal (default: 0.0001).
  * @returns True if the numbers are approximately equal, false otherwise.
  */
-export const isAlmostEqual = (n1: number, n2: number, epsilon = 0.0001): boolean =>
+export const almostEquals = (n1: number, n2: number, epsilon = 0.0001): boolean =>
 	Math.abs(n1 - n2) < epsilon;
 
 /**
