@@ -1,5 +1,13 @@
-/** Represents a numeric range with minimum and maximum values. */
-export type Range = { min: number; max: number };
+/**
+ * Determines if two numbers are approximately equal within a given epsilon tolerance.
+ *
+ * @param n1 - The first number to compare.
+ * @param n2 - The second number to compare.
+ * @param epsilon - The maximum allowed difference for the numbers to be considered equal (default: 0.0001).
+ * @returns True if the numbers are approximately equal, false otherwise.
+ */
+export const isAlmostEqual = (n1: number, n2: number, epsilon = 0.0001): boolean =>
+	Math.abs(n1 - n2) < epsilon;
 
 /**
  * Clamps a number to ensure it falls within the specified range.
@@ -30,6 +38,9 @@ export const randi = (min: number, max: number): number =>
  * @returns A random floating-point number between min and max.
  */
 export const randf = (min: number, max: number): number => Math.random() * (max - min) + min;
+
+/** Represents a numeric range with minimum and maximum values. */
+export type Range = { min: number; max: number };
 
 /**
  * Resolves a float value from a number, a Range, or undefined.
