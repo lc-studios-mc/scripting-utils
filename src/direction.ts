@@ -2,12 +2,12 @@ import * as mc from "@minecraft/server";
 import { Vec3 } from "./vec3.js";
 
 /**
- * Returns the cardinal direction (North, East, South, West, Up, Down) based on a rotation vector.
+ * Returns the cardinal direction (**North**, **East**, **South**, **West**, **Up**, **Down**) based on a rotation vector.
  *
- * @param rotation - The rotation as a Vector2 (x: pitch, y: yaw in degrees).
- * @param ignoreX - If true, ignores the X (pitch) axis for Up/Down.
- * @param ignoreY - If true, ignores the Y (yaw) axis for horizontal directions.
- * @returns The corresponding Direction value.
+ * @param rotation The rotation as a `Vector2` (`x`: pitch, `y`: yaw in degrees).
+ * @param ignoreX If `true`, ignores the X (pitch) axis for **Up/Down**.
+ * @param ignoreY If `true`, ignores the Y (yaw) axis for horizontal directions.
+ * @returns The corresponding `Direction` value.
  */
 export const getCardinalDirectionOfRotation = (
 	rotation: mc.Vector2,
@@ -18,8 +18,7 @@ export const getCardinalDirectionOfRotation = (
 	if (!ignoreX) {
 		if (rotation.x > 45) {
 			return mc.Direction.Down;
-		}
-		if (rotation.x < -45) {
+		} else if (rotation.x < -45) {
 			return mc.Direction.Up;
 		}
 	}
@@ -43,6 +42,39 @@ export const getCardinalDirectionOfRotation = (
 
 	// Default fallback
 	return mc.Direction.North;
+};
+
+/**
+ * Returns the rotation vector (`pitch`, `yaw`) for a given cardinal direction.
+ *
+ * @param direction The `mc.Direction` value (**North**, **East**, **South**, **West**, **Up**, **Down**).
+ * @returns The corresponding rotation as a `Vector2` (`x`: pitch, `y`: yaw in degrees):
+ *   - **North**: `{ x: 0, y: 0 }`
+ *   - **East**: `{ x: 0, y: 90 }`
+ *   - **South**: `{ x: 0, y: 180 }`
+ *   - **West**: `{ x: 0, y: -90 }`
+ *   - **Up**: `{ x: -90, y: 0 }`
+ *   - **Down**: `{ x: 90, y: 0 }`
+ *   - Returns `{ x: 0, y: 0 }` for unknown directions.
+ */
+export const getRotationOfCardinalDirection = (direction: mc.Direction): mc.Vector2 => {
+	switch (direction) {
+		case mc.Direction.North:
+			return { x: 0, y: 0 };
+		case mc.Direction.East:
+			return { x: 0, y: 90 };
+		case mc.Direction.South:
+			return { x: 0, y: 180 };
+		case mc.Direction.West:
+			return { x: 0, y: -90 };
+		case mc.Direction.Up:
+			return { x: -90, y: 0 };
+		case mc.Direction.Down:
+			return { x: 90, y: 0 };
+		default:
+			// Fallback for unknown directions
+			return { x: 0, y: 0 };
+	}
 };
 
 /**
