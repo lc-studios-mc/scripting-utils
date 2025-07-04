@@ -23,11 +23,11 @@ import * as mc from "@minecraft/server";
  * });
  * ```
  */
-export function calculateFinalDamage(
+export const calculateFinalDamage = (
 	entity: mc.Entity,
 	rawDamage: number,
 	damageCause = mc.EntityDamageCause.none,
-): number {
+): number => {
 	let finalDamage = rawDamage;
 
 	// Handle cases where raw damage is 0 or negative (e.g., healing)
@@ -55,7 +55,7 @@ export function calculateFinalDamage(
 	finalDamage *= 1 - resistanceReductionPercentage;
 
 	return finalDamage;
-}
+};
 
 interface RawArmorValue {
 	readonly armor: number;
@@ -97,7 +97,7 @@ const VANILLA_RAW_ARMOR_VALUES: ReadonlyMap<string, RawArmorValue> = new Map([
 	["minecraft:netherite_boots", { armor: 3, toughness: 3 }],
 ]);
 
-function getRawArmorValue(itemStack: mc.ItemStack): RawArmorValue {
+const getRawArmorValue = (itemStack: mc.ItemStack): RawArmorValue => {
 	// Check for vanilla armor values first
 	if (itemStack.typeId.startsWith("minecraft:")) {
 		const vanillaValue = VANILLA_RAW_ARMOR_VALUES.get(itemStack.typeId);
@@ -123,9 +123,9 @@ function getRawArmorValue(itemStack: mc.ItemStack): RawArmorValue {
 	}
 
 	return { armor, toughness };
-}
+};
 
-function getEquippedArmorArray(entity: mc.Entity): mc.ItemStack[] {
+const getEquippedArmorArray = (entity: mc.Entity): mc.ItemStack[] => {
 	const equippable = entity.getComponent("equippable")!;
 
 	if (!equippable) return [];
@@ -143,14 +143,14 @@ function getEquippedArmorArray(entity: mc.Entity): mc.ItemStack[] {
 	feet !== undefined ? armors.push(feet) : null;
 
 	return armors;
-}
+};
 
 interface ArmorStats {
 	readonly totalArmorPoints: number;
 	readonly totalToughness: number;
 }
 
-function getArmorStats(armors: mc.ItemStack[]): ArmorStats {
+const getArmorStats = (armors: mc.ItemStack[]): ArmorStats => {
 	let totalArmorPoints = 0;
 	let totalToughness = 0;
 
@@ -161,9 +161,9 @@ function getArmorStats(armors: mc.ItemStack[]): ArmorStats {
 	}
 
 	return { totalArmorPoints, totalToughness };
-}
+};
 
-function calculateArmorReduction(rawDamage: number, armorStats: ArmorStats): number {
+const calculateArmorReduction = (rawDamage: number, armorStats: ArmorStats): number => {
 	if (armorStats.totalArmorPoints === 0) return 0;
 
 	const penetrationFactor = armorStats.totalToughness / 4 + 2;
@@ -181,12 +181,12 @@ function calculateArmorReduction(rawDamage: number, armorStats: ArmorStats): num
 	armorReductionPercentage = Math.max(armorReductionPercentage, 0.008); // 0.8% minimum resistance
 
 	return armorReductionPercentage;
-}
+};
 
-function calculateEnchantmentReduction(
+const calculateEnchantmentReduction = (
 	damageCause: mc.EntityDamageCause,
 	armors: mc.ItemStack[],
-): number {
+): number => {
 	let totalEnchantmentReduction = 0;
 
 	const isSpecializedProtection = (
@@ -235,9 +235,9 @@ function calculateEnchantmentReduction(
 
 	// Cap the total enchantment reduction at 80%
 	return Math.min(totalEnchantmentReduction, 0.8);
-}
+};
 
-function calculateResistanceReduction(entity: mc.Entity): number {
+const calculateResistanceReduction = (entity: mc.Entity): number => {
 	let highestResistanceLevel = 0;
 
 	const resistanceEffect = entity.getEffect("resistance");
@@ -260,4 +260,4 @@ function calculateResistanceReduction(entity: mc.Entity): number {
 		default:
 			return 1.0; // Levels 4+ give full reduction
 	}
-}
+};

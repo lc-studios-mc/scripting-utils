@@ -7,7 +7,7 @@ import { Vec3 } from "./vec3.js";
  * @param direction - Original direction.
  * @returns Reversed version of `direction`.
  */
-export function reverseDirection(direction: mc.Direction): mc.Direction {
+export const reverseDirection = (direction: mc.Direction): mc.Direction => {
 	switch (direction) {
 		case mc.Direction.Up:
 			return mc.Direction.Down;
@@ -22,7 +22,7 @@ export function reverseDirection(direction: mc.Direction): mc.Direction {
 		case mc.Direction.East:
 			return mc.Direction.West;
 	}
-}
+};
 
 /**
  * Gets a location relative to an origin, rotated by a cardinal direction.
@@ -32,11 +32,11 @@ export function reverseDirection(direction: mc.Direction): mc.Direction {
  * @param cardinalDirection - The cardinal direction (default North).
  * @returns The relative location vector.
  */
-export function getRelativeLocationAtDirection(
+export const getRelativeLocationAtDirection = (
 	origin: mc.Vector3,
 	relative: mc.Vector3,
 	cardinalDirection = mc.Direction.North,
-) {
+) => {
 	switch (cardinalDirection) {
 		default:
 		case mc.Direction.North:
@@ -48,4 +48,4 @@ export function getRelativeLocationAtDirection(
 		case mc.Direction.East:
 			return Vec3.add(origin, Vec3.rotateDeg(relative, Vec3.up, -90));
 	}
-}
+};

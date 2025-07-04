@@ -9,9 +9,8 @@ export type Range = { min: number; max: number };
  * @param max - The maximum allowable value.
  * @returns The clamped value.
  */
-export function clamp(value: number, min: number, max: number): number {
-	return Math.max(min, Math.min(max, value));
-}
+export const clamp = (value: number, min: number, max: number): number =>
+	Math.max(min, Math.min(max, value));
 
 /**
  * Generates a random integer between the specified minimum and maximum values (inclusive).
@@ -20,9 +19,8 @@ export function clamp(value: number, min: number, max: number): number {
  * @param max - The maximum value (inclusive).
  * @returns A random integer between min and max.
  */
-export function randi(min: number, max: number): number {
-	return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+export const randi = (min: number, max: number): number =>
+	Math.floor(Math.random() * (max - min + 1)) + min;
 
 /**
  * Generates a random floating-point number between the specified minimum and maximum values.
@@ -31,9 +29,7 @@ export function randi(min: number, max: number): number {
  * @param max - The maximum value (exclusive).
  * @returns A random floating-point number between min and max.
  */
-export function randf(min: number, max: number): number {
-	return Math.random() * (max - min) + min;
-}
+export const randf = (min: number, max: number): number => Math.random() * (max - min) + min;
 
 /**
  * Resolves a float value from a number, a Range, or undefined.
@@ -45,11 +41,11 @@ export function randf(min: number, max: number): number {
  * @param fallback - Value to return if range is undefined (default: 0)
  * @returns A float value
  */
-export function resolveRangeFloat(range?: number | Range, fallback = 0): number {
+export const resolveRangeFloat = (range?: number | Range, fallback = 0): number => {
 	if (range === undefined) return fallback;
 	if (typeof range === "number") return range;
 	return randf(range.min, range.max);
-}
+};
 
 /**
  * Resolves an integer value from a number, a Range, or undefined.
@@ -61,8 +57,8 @@ export function resolveRangeFloat(range?: number | Range, fallback = 0): number 
  * @param fallback - Value to return if range is undefined (default: 0)
  * @returns An integer value
  */
-export function resolveRangeInt(range?: number | Range, fallback = 0): number {
+export const resolveRangeInt = (range?: number | Range, fallback = 0): number => {
 	if (range === undefined) return fallback;
 	if (typeof range === "number") return Math.floor(range);
 	return randi(range.min, range.max);
-}
+};

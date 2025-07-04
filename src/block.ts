@@ -4,10 +4,10 @@ import * as mc from "@minecraft/server";
  * Destroys a block by running the `setblock` command with `destroy` flag set to true.
  * @param block - The block to destroy.
  */
-export function destroyBlock(block: mc.Block): void {
+export const destroyBlock = (block: mc.Block): void => {
 	const location = `${block.x} ${block.y} ${block.z}`;
 	block.dimension.runCommand(`setblock ${location} air destroy`);
-}
+};
 
 /**
  * Retrieves a block relative to the given origin block in the specified direction and number of steps.
@@ -17,11 +17,11 @@ export function destroyBlock(block: mc.Block): void {
  * @param steps - The number of steps to move in the specified direction (default is 1).
  * @returns The block at the relative position, could be undefined.
  */
-export function getRelativeBlockAtDirection(
+export const getRelativeBlockAtDirection = (
 	origin: mc.Block,
 	direction: mc.Direction,
 	steps = 1,
-): mc.Block | undefined {
+): mc.Block | undefined => {
 	switch (direction) {
 		case mc.Direction.Up:
 			return origin.above(steps);
@@ -36,7 +36,7 @@ export function getRelativeBlockAtDirection(
 		case mc.Direction.East:
 			return origin.east(steps);
 	}
-}
+};
 
 /**
  * Gets the value of `minecraft:cardinal_direction` state.
@@ -44,9 +44,9 @@ export function getRelativeBlockAtDirection(
  * @param permutation - Block permutation.
  * @returns Direction, undefined if the state does not exist.
  */
-export function getBlockCardinalDirection(
+export const getBlockCardinalDirection = (
 	permutation: mc.BlockPermutation,
-): mc.Direction | undefined {
+): mc.Direction | undefined => {
 	const blockDir = permutation.getState("minecraft:cardinal_direction");
 
 	switch (blockDir) {
@@ -61,14 +61,14 @@ export function getBlockCardinalDirection(
 	}
 
 	return undefined;
-}
+};
 
 /**
  * Gets the value of `minecraft:block_face` state.
  * @param permutation - Block permutation.
  * @returns Direction, undefined if the state does not exist.
  */
-export function getBlockFace(permutation: mc.BlockPermutation): mc.Direction | undefined {
+export const getBlockFace = (permutation: mc.BlockPermutation): mc.Direction | undefined => {
 	const blockDir = permutation.getState("minecraft:block_face");
 
 	switch (blockDir) {
@@ -87,4 +87,4 @@ export function getBlockFace(permutation: mc.BlockPermutation): mc.Direction | u
 	}
 
 	return undefined;
-}
+};

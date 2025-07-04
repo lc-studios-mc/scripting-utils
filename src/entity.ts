@@ -5,11 +5,11 @@ import * as mc from "@minecraft/server";
  * @param entity - The entity to check.
  * @returns True if the entity is valid and its current health is greater than 0, otherwise false.
  */
-export function isEntityAlive(entity: mc.Entity): boolean {
+export const isEntityAlive = (entity: mc.Entity): boolean => {
 	if (!entity.isValid) return false;
 	const health = entity.getComponent("health");
 	return health !== undefined && health.currentValue > 0;
-}
+};
 
 /**
  * Safely applies an impulse to an entity. This function exists because calling `applyImpulse` directly on a Player will result in an error.
@@ -17,16 +17,8 @@ export function isEntityAlive(entity: mc.Entity): boolean {
  * @param entity - The entity to apply the impulse to.
  * @param vector - The impulse vector to apply.
  */
-export function applyImpulseSafe(entity: mc.Entity, vector: mc.Vector3): void {
-	try {
-		if (entity instanceof mc.Player) {
-			applyImpulseToPlayer(entity, vector);
-			return;
-		}
-
-		entity.applyImpulse(vector);
-	} catch {}
-}
+export const applyImpulseSafe = (entity: mc.Entity, vector: mc.Vector3): void =>
+	entity instanceof mc.Player ? applyImpulseToPlayer(entity, vector) : entity.applyImpulse(vector);
 
 /**
  * Simulates applying an impulse to a player by using knockback to closely match vanilla impulse behavior.
@@ -34,7 +26,7 @@ export function applyImpulseSafe(entity: mc.Entity, vector: mc.Vector3): void {
  * @param player - The player entity to apply the impulse to.
  * @param vector - The impulse vector to apply.
  */
-export function applyImpulseToPlayer(player: mc.Player, vector: mc.Vector3): void {
+export const applyImpulseToPlayer = (player: mc.Player, vector: mc.Vector3): void => {
 	const { x, y, z } = vector;
 	const previousVelocity = player.getVelocity();
 
@@ -66,30 +58,22 @@ export function applyImpulseToPlayer(player: mc.Player, vector: mc.Vector3): voi
 		},
 		verticalStrength,
 	);
-}
+};
 
 /**
  * Safely clears the velocity of an entity. This function exists because calling `clearVelocity` directly on a Player will result in an error.
  * For players, a custom method is used to simulate velocity clearing.
  * @param entity - The entity to clear the velocity of.
  */
-export function clearVelocitySafe(entity: mc.Entity): void {
-	try {
-		if (entity instanceof mc.Player) {
-			clearVelocityOfPlayer(entity);
-			return;
-		}
-
-		entity.clearVelocity();
-	} catch {}
-}
+export const clearVelocitySafe = (entity: mc.Entity): void =>
+	entity instanceof mc.Player ? clearVelocityOfPlayer(entity) : entity.clearVelocity();
 
 /**
  * Simulates clearing the velocity of a player by applying a knockback in the opposite direction of current velocity.
  * This function exists because calling `clearVelocity` directly on a Player will result in an error.
  * @param player - The player entity to clear the velocity of.
  */
-export function clearVelocityOfPlayer(player: mc.Player) {
+export const clearVelocityOfPlayer = (player: mc.Player) => {
 	const { x, z } = player.getVelocity();
 
 	// Calculate the norm (magnitude) of the horizontal components (x and z)
@@ -111,7 +95,7 @@ export function clearVelocityOfPlayer(player: mc.Player) {
 		},
 		0,
 	);
-}
+};
 
 /**
  * Gets a display name for the entity in the following order:
@@ -122,7 +106,7 @@ export function clearVelocityOfPlayer(player: mc.Player) {
  * @param entity - The entity instance or a type ID string.
  * @returns A RawText object representing the entity's name.
  */
-export function getEntityNameRawText(entity: mc.Entity | string): mc.RawText {
+export const getEntityNameRawText = (entity: mc.Entity | string): mc.RawText => {
 	// If a type ID string is provided, return its translated name
 	if (typeof entity === "string") {
 		return getEntityNameRawTextFromTypeId(entity);
@@ -143,15 +127,15 @@ export function getEntityNameRawText(entity: mc.Entity | string): mc.RawText {
 		// In case of any error, return 'Unknown'
 		return { rawtext: [{ text: "Unknown" }] };
 	}
-}
+};
 
 /**
  * Returns a RawText object with the translated name for a given entity type ID.
  * @param typeId - The entity type ID (e.g., "minecraft:zombie").
  * @returns A RawText object with the translation key for the entity name.
  */
-function getEntityNameRawTextFromTypeId(typeId: string): mc.RawText {
+const getEntityNameRawTextFromTypeId = (typeId: string): mc.RawText => {
 	const namespace = typeId.split(":")[0];
 	const entityTypeId = namespace === "minecraft" ? typeId.replace("minecraft:", "") : typeId;
 	return { rawtext: [{ translate: `entity.${entityTypeId}.name` }] };
-}
+};
