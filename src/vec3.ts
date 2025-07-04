@@ -96,11 +96,32 @@ export class Vec3 implements Vector3 {
 	}
 
 	/**
+	 * Creates a complete Vector3.
+	 *
+	 * It uses properties from the `primary` object first. Any missing properties
+	 * are then filled from the `fallback` object. If a property is missing from both,
+	 * it defaults to 0.
+	 *
+	 * @param primary - The partial vector whose properties take precedence.
+	 * @param fallback - The partial vector used to fill in any missing properties.
+	 * @returns A new, complete Vector3.
+	 */
+	static create(primary?: Partial<Vector3>, fallback?: Partial<Vector3>): Vector3 {
+		const defaults = { x: 0, y: 0, z: 0 };
+
+		return {
+			...defaults,
+			...fallback,
+			...primary,
+		};
+	}
+
+	/**
 	 * Creates a Vector3 from a partial object, filling missing components with 0.
 	 * @param value - Partial vector with optional x, y, z properties.
 	 * @returns A complete Vector3 object.
 	 */
-	static fromPartial(value: Partial<Vector3>): Vector3 {
+	static fromPartial(value?: Partial<Vector3>): Vector3 {
 		return {
 			x: value?.x ?? 0,
 			y: value?.y ?? 0,
@@ -589,16 +610,9 @@ export class Vec3 implements Vector3 {
 		this._vec.z = value;
 	}
 
-	/**
-	 * Creates a new Vec3 instance.
-	 * @param base - The base vector to initialize with (default is Vec3.zero).
-	 */
-	constructor(base?: Partial<Vector3>) {
-		this._vec = {
-			x: Number(base?.x),
-			y: Number(base?.y),
-			z: Number(base?.z),
-		};
+	/** Creates a new Vec3 instance. */
+	constructor(primary?: Partial<Vector3>, fallback?: Partial<Vector3>) {
+		this._vec = Vec3.create(primary, fallback);
 	}
 
 	/**
