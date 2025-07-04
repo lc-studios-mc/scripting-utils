@@ -1,7 +1,11 @@
-import * as utils from "./utils.js";
-import * as console from "./console.js";
-import { EventEmitter } from "./event-emitter.js";
-import { Timeline } from "./timeline.js";
-import { Vec3 } from "./vec3.js";
-
-export { console, EventEmitter, Timeline, utils, Vec3 };
+export * from "./block.js";
+export * as console from "./console.js";
+export * from "./damage.js";
+export * from "./direction.js";
+export * from "./entity.js";
+export * from "./event-emitter.js";
+export * from "./math.js";
+export * from "./misc.js";
+export * from "./player.js";
+export * from "./timeline.js";
+export * from "./vec3.js";
