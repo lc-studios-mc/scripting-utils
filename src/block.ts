@@ -10,6 +10,22 @@ export const destroyBlock = (block: mc.Block): void => {
 };
 
 /**
+ * Checks if the given block or any directly adjacent block has redstone power greater than 0.
+ *
+ * @param block - The block to check for redstone power, including its adjacent blocks.
+ * @returns True if the block or any adjacent block is powered; otherwise, false.
+ */
+export const isBlockOrAdjacentPowered = (block: mc.Block): boolean =>
+	!!block &&
+	((block.getRedstonePower?.() ?? 0) > 0 ||
+		(block.above?.()?.getRedstonePower?.() ?? 0) > 0 ||
+		(block.below?.()?.getRedstonePower?.() ?? 0) > 0 ||
+		(block.north?.()?.getRedstonePower?.() ?? 0) > 0 ||
+		(block.south?.()?.getRedstonePower?.() ?? 0) > 0 ||
+		(block.east?.()?.getRedstonePower?.() ?? 0) > 0 ||
+		(block.west?.()?.getRedstonePower?.() ?? 0) > 0);
+
+/**
  * Retrieves a block relative to the given origin block in the specified direction and number of steps.
  *
  * @param origin - The starting block from which to calculate the relative position.
