@@ -1,3 +1,6 @@
+/** Represents a numeric range with minimum and maximum values. */
+export type Range = { min: number; max: number };
+
 /**
  * Clamps a number to ensure it falls within the specified range.
  *
@@ -32,31 +35,34 @@ export function randf(min: number, max: number): number {
 	return Math.random() * (max - min) + min;
 }
 
-/** Represents a numeric range with minimum and maximum values. */
-export type Range = { min: number; max: number };
-
 /**
- * Resolves a float value from a number or a Range.
+ * Resolves a float value from a number, a Range, or undefined.
  * If a number is provided, returns it as-is.
  * If a Range is provided, returns a random float between min and max.
+ * If undefined, returns the fallback value.
  *
- * @param range - A number or a Range object
+ * @param range - A number, a Range object, or undefined
+ * @param fallback - Value to return if range is undefined (default: 0)
  * @returns A float value
  */
-export function resolveRangeFloat(range: number | Range): number {
+export function resolveRangeFloat(range?: number | Range, fallback = 0): number {
+	if (range === undefined) return fallback;
 	if (typeof range === "number") return range;
 	return randf(range.min, range.max);
 }
 
 /**
- * Resolves an integer value from a number or a Range.
+ * Resolves an integer value from a number, a Range, or undefined.
  * If a number is provided, returns its floored value.
  * If a Range is provided, returns a random integer between min and max.
+ * If undefined, returns the fallback value.
  *
- * @param range - A number or a Range object
+ * @param range - A number, a Range object, or undefined
+ * @param fallback - Value to return if range is undefined (default: 0)
  * @returns An integer value
  */
-export function resolveRangeInt(range: number | Range): number {
+export function resolveRangeInt(range?: number | Range, fallback = 0): number {
+	if (range === undefined) return fallback;
 	if (typeof range === "number") return Math.floor(range);
 	return randi(range.min, range.max);
 }

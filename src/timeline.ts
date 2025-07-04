@@ -1,3 +1,21 @@
+/**
+ * Custom error class for timeline-related errors
+ */
+export class TimelineError extends Error {
+	constructor(
+		message: string,
+		public readonly context?: Record<string, any>,
+	) {
+		super(message);
+		this.name = "TimelineError";
+	}
+}
+
+/**
+ * Record mapping percentages (0-1) to event functions
+ */
+export type TimelineRecord<TArgs = any> = Record<number, (args: TArgs) => void>;
+
 interface ProcessedEvent<T = any> {
 	tick: number;
 	func: (args: T) => void;
@@ -36,7 +54,7 @@ interface ProcessedEvent<T = any> {
  * // "Complete"
  * ```
  */
-class Timeline<TArgs = any> {
+export class Timeline<TArgs = any> {
 	private readonly duration: number;
 	private readonly sortedEvents: ProcessedEvent<TArgs>[];
 	private lastProcessedTick: number = -1;
@@ -48,15 +66,15 @@ class Timeline<TArgs = any> {
 	 * @param timelineRecord - Map of percentages (0-1) to event functions
 	 * @throws {TimelineError} When validation fails
 	 */
-	constructor(duration: number, timelineRecord: Timeline.TimelineRecord<TArgs>) {
+	constructor(duration: number, timelineRecord: TimelineRecord<TArgs>) {
 		if (!Number.isFinite(duration) || duration <= 0) {
-			throw new Timeline.TimelineError("Timeline duration must be a positive finite number", {
+			throw new TimelineError("Timeline duration must be a positive finite number", {
 				duration,
 			});
 		}
 
 		if (!timelineRecord || Object.keys(timelineRecord).length === 0) {
-			throw new Timeline.TimelineError("Timeline record cannot be empty or null");
+			throw new TimelineError("Timeline record cannot be empty or null");
 		}
 
 		this.duration = duration;
@@ -70,7 +88,7 @@ class Timeline<TArgs = any> {
 				const percentage = parseFloat(percentageStr);
 
 				if (!Number.isFinite(percentage)) {
-					throw new Timeline.TimelineError(
+					throw new TimelineError(
 						`Invalid percentage key: "${percentageStr}" is not a valid number`,
 						{
 							invalidKey: percentageStr,
@@ -79,7 +97,7 @@ class Timeline<TArgs = any> {
 				}
 
 				if (percentage < 0 || percentage > 1) {
-					throw new Timeline.TimelineError(
+					throw new TimelineError(
 						`Percentage out of range: ${percentage}. Must be between 0 and 1`,
 						{
 							percentage,
@@ -89,7 +107,7 @@ class Timeline<TArgs = any> {
 				}
 
 				if (seenPercentages.has(percentage)) {
-					throw new Timeline.TimelineError(
+					throw new TimelineError(
 						`Duplicate percentage found: ${percentage}. Each percentage must be unique`,
 						{
 							percentage,
@@ -99,13 +117,10 @@ class Timeline<TArgs = any> {
 				seenPercentages.add(percentage);
 
 				if (typeof func !== "function") {
-					throw new Timeline.TimelineError(
-						`Event handler must be a function for percentage ${percentage}`,
-						{
-							percentage,
-							receivedType: typeof func,
-						},
-					);
+					throw new TimelineError(`Event handler must be a function for percentage ${percentage}`, {
+						percentage,
+						receivedType: typeof func,
+					});
 				}
 
 				return {
@@ -131,7 +146,7 @@ class Timeline<TArgs = any> {
 	 */
 	process(tick: number, args: TArgs): void {
 		if (!Number.isFinite(tick)) {
-			throw new Timeline.TimelineError("Tick must be a finite number", {
+			throw new TimelineError("Tick must be a finite number", {
 				tick,
 				tickType: typeof tick,
 			});
@@ -158,7 +173,7 @@ class Timeline<TArgs = any> {
 					event.func(args);
 					event.executed = true;
 				} catch (error) {
-					throw new Timeline.TimelineError(
+					throw new TimelineError(
 						`Timeline event failed at ${(event.percentage * 100).toFixed(2)}% (tick ${event.tick})`,
 						{
 							percentage: event.percentage,
@@ -243,25 +258,3 @@ class Timeline<TArgs = any> {
 		}));
 	}
 }
-
-namespace Timeline {
-	/**
-	 * Custom error class for timeline-related errors
-	 */
-	export class TimelineError extends Error {
-		constructor(
-			message: string,
-			public readonly context?: Record<string, any>,
-		) {
-			super(message);
-			this.name = "TimelineError";
-		}
-	}
-
-	/**
-	 * Record mapping percentages (0-1) to event functions
-	 */
-	export type TimelineRecord<TArgs = any> = Record<number, (args: TArgs) => void>;
-}
-
-export { Timeline };

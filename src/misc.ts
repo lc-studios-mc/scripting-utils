@@ -1,5 +1,6 @@
 /**
- * Checks if a given item is a record object (and not null or an array).
+ * Checks if a given item is a `Record<string, any>` object (and not null or an array).
+ *
  * @param item - The item to check.
  * @returns True if the item is a non-null, non-array object, false otherwise.
  */
@@ -9,6 +10,7 @@ export function isRecordObject(item: unknown): item is Record<string, any> {
 
 /**
  * Deeply merges two objects.
+ *
  * @param target - The target object to merge into.
  * @param source - The source object to merge from.
  * @returns A new object representing the merged result.
@@ -26,33 +28,35 @@ export function deepMerge<T extends Record<string, any>, U extends Record<string
 	target: T,
 	source: U,
 ): T & U {
-	// Create a new object to avoid modifying the original target object.
-	// We use 'as any' here because the type will be built up dynamically.
-	const output: any = { ...target };
+	// Create a new object to avoid modifying the original target.
+	const output = { ...target } as T & U;
 
 	if (isRecordObject(target) && isRecordObject(source)) {
-		Object.keys(source).forEach((key) => {
+		for (const key in source) {
 			if (isRecordObject(source[key])) {
-				if (!(key in target)) {
-					// If the key doesn't exist in the target, assign the source's object directly.
-					output[key] = source[key];
+				// If the key exists in the target and its value is also an object,
+				// recursively merge them.
+				if (key in target && isRecordObject(target[key])) {
+					// No need to cast `target[key]` as it's already checked by `isObject`
+					(output as any)[key] = deepMerge(target[key], source[key]);
 				} else {
-					// If the key exists in both and both are objects, recursively merge them.
-					output[key] = deepMerge(target[key], source[key]);
+					// Otherwise, assign the source's object directly.
+					(output as any)[key] = source[key];
 				}
 			} else {
-				// If the source's value is not an object, assign it directly (overwriting target's value).
-				output[key] = source[key];
+				// If the source's value is not an object, assign it directly.
+				(output as any)[key] = source[key];
 			}
-		});
+		}
 	}
 
-	return output as T & U;
+	return output;
 }
 
 /**
  * Recursively compares two objects for deep equality.
  * Handles primitive types, arrays, and nested objects.
+ *
  * @param obj1 - The first object to compare.
  * @param obj2 - The second object to compare.
  * @returns `true` if the objects are deeply equal, `false` otherwise.
