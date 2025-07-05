@@ -1,4 +1,5 @@
 import * as mc from "@minecraft/server";
+import { addItemsToContainerOrDrop } from "./container.js";
 
 /**
  * Checks if the given entity is alive (i.e., has health greater than 0 and is valid).
@@ -112,6 +113,24 @@ export const clearVelocitySafe = (entity: mc.Entity): void => {
 			mimicClearVelocityWithKnockback(entity);
 		} catch {}
 	}
+};
+
+/**
+ * Gives one or more ItemStacks to an entity. Attempts to add items to the entity's inventory container;
+ * if the inventory is full or missing, items are dropped at the entity's location in its dimension.
+ *
+ * @param entity - The entity to receive the items.
+ * @param itemStacks - One or more ItemStack objects to give to the entity.
+ */
+export const giveItemsToEntity = (entity: mc.Entity, ...itemStacks: mc.ItemStack[]): void => {
+	const container = entity.getComponent("inventory")?.container;
+
+	addItemsToContainerOrDrop({
+		itemStacks,
+		container,
+		dropDimension: entity.dimension,
+		dropLocation: entity.location,
+	});
 };
 
 /**
