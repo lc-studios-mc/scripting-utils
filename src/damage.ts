@@ -1,65 +1,13 @@
 import * as mc from "@minecraft/server";
 
-/**
- * Calculates the final damage an entity will take after applying armor, enchantment, and resistance reductions.
- * Ensures at least 1 damage point is dealt if the raw damage is positive, preventing full invulnerability from
- * reductions. (Except a level 5 or higher Resistance effect)
- *
- * Particularly useful when you want to apply damage of a cause that penetrates hit immunity (e.g. `override`), but still
- * take armor and other defensive properties into account. (Example below)
- *
- * @param entity - The entity receiving damage.
- * @param rawDamage - The initial raw damage before reductions.
- * @param damageCause - The cause of the damage (used for enchantment calculations), defaults to `none`.
- * @returns The final damage value after all reductions.
- *
- * @example
- *
- * ```typescript
- * // Deals 20 damage, ignoring hit immunity but taking armor into account
- * let damage = damageUtils.calculateFinalDamage(entity, 20);
- * entity.applyDamage(damage, {
- *   cause: EntityDamageCause.override, // This EntityDamageCause ignores hit immunity
- * });
- * ```
- */
-export const calculateFinalDamage = (
-	entity: mc.Entity,
-	rawDamage: number,
-	damageCause = mc.EntityDamageCause.none,
-): number => {
-	let finalDamage = rawDamage;
-
-	// Handle cases where raw damage is 0 or negative (e.g., healing)
-	if (finalDamage <= 0) {
-		return finalDamage;
-	}
-
-	const armors = getEquippedArmorArray(entity);
-
-	// Apply Armor Reduction
-	const armorStats = getArmorStats(armors);
-	const armorReductionPercentage = calculateArmorReduction(finalDamage, armorStats);
-	finalDamage *= 1 - armorReductionPercentage;
-
-	// Apply Enchantment Reduction
-	const enchantmentReductionPercentage = calculateEnchantmentReduction(damageCause, armors);
-	finalDamage *= 1 - enchantmentReductionPercentage;
-
-	// Ensure at least 1 damage point (0.5 hearts) is taken.
-	// This prevents true invulnerability from combined armor/enchantments alone.
-	finalDamage = Math.max(1, finalDamage);
-
-	// Apply Resistance Effect Reduction
-	const resistanceReductionPercentage = calculateResistanceReduction(entity);
-	finalDamage *= 1 - resistanceReductionPercentage;
-
-	return finalDamage;
-};
-
 interface RawArmorValue {
 	readonly armor: number;
 	readonly toughness: number;
+}
+
+interface ArmorStats {
+	readonly totalArmorPoints: number;
+	readonly totalToughness: number;
 }
 
 const VANILLA_RAW_ARMOR_VALUES: ReadonlyMap<string, RawArmorValue> = new Map([
@@ -126,7 +74,7 @@ const getRawArmorValue = (itemStack: mc.ItemStack): RawArmorValue => {
 };
 
 const getEquippedArmorArray = (entity: mc.Entity): mc.ItemStack[] => {
-	const equippable = entity.getComponent("equippable")!;
+	const equippable = entity.getComponent("equippable");
 
 	if (!equippable) return [];
 
@@ -144,11 +92,6 @@ const getEquippedArmorArray = (entity: mc.Entity): mc.ItemStack[] => {
 
 	return armors;
 };
-
-interface ArmorStats {
-	readonly totalArmorPoints: number;
-	readonly totalToughness: number;
-}
 
 const getArmorStats = (armors: mc.ItemStack[]): ArmorStats => {
 	let totalArmorPoints = 0;
@@ -260,4 +203,61 @@ const calculateResistanceReduction = (entity: mc.Entity): number => {
 		default:
 			return 1.0; // Levels 4+ give full reduction
 	}
+};
+
+/**
+ * Calculates the final damage an entity will take after applying armor, enchantment, and resistance reductions.
+ * Ensures at least 1 damage point is dealt if the raw damage is positive, preventing full invulnerability from
+ * reductions. (Except a level 5 or higher Resistance effect)
+ *
+ * Particularly useful when you want to apply damage of a cause that penetrates hit immunity (e.g. `override`), but still
+ * take armor and other defensive properties into account. (Example below)
+ *
+ * @param entity - The entity receiving damage.
+ * @param rawDamage - The initial raw damage before reductions.
+ * @param damageCause - The cause of the damage (used for enchantment calculations), defaults to `none`.
+ * @returns The final damage value after all reductions.
+ *
+ * @example
+ *
+ * ```typescript
+ * // Deals 20 damage, ignoring hit immunity but taking armor into account
+ * let damage = damageUtils.calculateFinalDamage(entity, 20);
+ * entity.applyDamage(damage, {
+ * cause: EntityDamageCause.override, // This EntityDamageCause ignores hit immunity
+ * });
+ * ```
+ */
+export const calculateFinalDamage = (
+	entity: mc.Entity,
+	rawDamage: number,
+	damageCause = mc.EntityDamageCause.none,
+): number => {
+	let finalDamage = rawDamage;
+
+	// Handle cases where raw damage is 0 or negative (e.g., healing)
+	if (finalDamage <= 0) {
+		return finalDamage;
+	}
+
+	const armors = getEquippedArmorArray(entity);
+
+	// Apply Armor Reduction
+	const armorStats = getArmorStats(armors);
+	const armorReductionPercentage = calculateArmorReduction(finalDamage, armorStats);
+	finalDamage *= 1 - armorReductionPercentage;
+
+	// Apply Enchantment Reduction
+	const enchantmentReductionPercentage = calculateEnchantmentReduction(damageCause, armors);
+	finalDamage *= 1 - enchantmentReductionPercentage;
+
+	// Ensure at least 1 damage point (0.5 hearts) is taken.
+	// This prevents true invulnerability from combined armor/enchantments alone.
+	finalDamage = Math.max(1, finalDamage);
+
+	// Apply Resistance Effect Reduction
+	const resistanceReductionPercentage = calculateResistanceReduction(entity);
+	finalDamage *= 1 - resistanceReductionPercentage;
+
+	return finalDamage;
 };
