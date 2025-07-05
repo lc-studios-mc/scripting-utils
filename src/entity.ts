@@ -2,6 +2,7 @@ import * as mc from "@minecraft/server";
 
 /**
  * Checks if the given entity is alive (i.e., has health greater than 0 and is valid).
+ *
  * @param entity - The entity to check.
  * @returns True if the entity is valid and its current health is greater than 0, otherwise false.
  */
@@ -12,23 +13,15 @@ export const isEntityAlive = (entity: mc.Entity): boolean => {
 };
 
 /**
- * Safely applies an impulse to an entity. This function exists because calling `applyImpulse` directly on a Player will result in an error.
- * For players, a custom method is used to simulate vanilla impulse behavior.
+ * Mimics the behavior of applyImpulse using applyKnockback as a fallback.
+ * Calculates horizontal and vertical strengths to simulate an impulse effect.
+ *
  * @param entity - The entity to apply the impulse to.
  * @param vector - The impulse vector to apply.
  */
-export const applyImpulseSafe = (entity: mc.Entity, vector: mc.Vector3): void =>
-	entity instanceof mc.Player ? applyImpulseToPlayer(entity, vector) : entity.applyImpulse(vector);
-
-/**
- * Simulates applying an impulse to a player by using knockback to closely match vanilla impulse behavior.
- * This function exists because calling `applyImpulse` directly on a Player will result in an error.
- * @param player - The player entity to apply the impulse to.
- * @param vector - The impulse vector to apply.
- */
-export const applyImpulseToPlayer = (player: mc.Player, vector: mc.Vector3): void => {
+const mimicApplyImpulseWithKnockback = (entity: mc.Entity, vector: mc.Vector3): void => {
 	const { x, y, z } = vector;
-	const previousVelocity = player.getVelocity();
+	const previousVelocity = entity.getVelocity();
 
 	// Calculate the norm (magnitude) of the horizontal components (x and z)
 	const horizontalNorm = Math.sqrt(x * x + z * z);
@@ -51,7 +44,7 @@ export const applyImpulseToPlayer = (player: mc.Player, vector: mc.Vector3): voi
 	const verticalStrength = y + previousVelocity.y * 0.9;
 
 	// Apply the knockback
-	player.applyKnockback(
+	entity.applyKnockback(
 		{
 			x: directionX * horizontalStrength,
 			z: directionZ * horizontalStrength,
@@ -61,20 +54,29 @@ export const applyImpulseToPlayer = (player: mc.Player, vector: mc.Vector3): voi
 };
 
 /**
- * Safely clears the velocity of an entity. This function exists because calling `clearVelocity` directly on a Player will result in an error.
- * For players, a custom method is used to simulate velocity clearing.
- * @param entity - The entity to clear the velocity of.
+ * Safely applies an impulse to an entity. Falls back to knockback if applyImpulse fails.
+ *
+ * @param entity - The entity to apply the impulse to.
+ * @param vector - The impulse vector to apply.
  */
-export const clearVelocitySafe = (entity: mc.Entity): void =>
-	entity instanceof mc.Player ? clearVelocityOfPlayer(entity) : entity.clearVelocity();
+export const applyEntityImpulseSafe = (entity: mc.Entity, vector: mc.Vector3): void => {
+	try {
+		entity.applyImpulse(vector);
+	} catch {
+		try {
+			mimicApplyImpulseWithKnockback(entity, vector);
+		} catch {}
+	}
+};
 
 /**
- * Simulates clearing the velocity of a player by applying a knockback in the opposite direction of current velocity.
- * This function exists because calling `clearVelocity` directly on a Player will result in an error.
- * @param player - The player entity to clear the velocity of.
+ * Mimics the behavior of clearVelocity using applyKnockback as a fallback.
+ * Applies a knockback in the opposite direction of current velocity to nullify it.
+ *
+ * @param entity - The entity whose velocity should be cleared.
  */
-export const clearVelocityOfPlayer = (player: mc.Player) => {
-	const { x, z } = player.getVelocity();
+const mimicClearVelocityWithKnockback = (entity: mc.Entity) => {
+	const { x, z } = entity.getVelocity();
 
 	// Calculate the norm (magnitude) of the horizontal components (x and z)
 	const horizontalNorm = Math.sqrt(x * x + z * z);
@@ -88,13 +90,40 @@ export const clearVelocityOfPlayer = (player: mc.Player) => {
 	}
 
 	// Apply the knockback
-	player.applyKnockback(
+	entity.applyKnockback(
 		{
 			x: directionX * horizontalNorm,
 			z: directionZ * horizontalNorm,
 		},
 		0,
 	);
+};
+
+/**
+ * Safely clears the velocity of an entity. Falls back to knockback if clearVelocity fails.
+ *
+ * @param entity - The entity whose velocity should be cleared.
+ */
+export const clearVelocitySafe = (entity: mc.Entity): void => {
+	try {
+		entity.clearVelocity();
+	} catch {
+		try {
+			mimicClearVelocityWithKnockback(entity);
+		} catch {}
+	}
+};
+
+/**
+ * Returns a RawText object with the translated name for a given entity type ID.
+ *
+ * @param typeId - The entity type ID (e.g., "minecraft:zombie").
+ * @returns A RawText object with the translation key for the entity name.
+ */
+const getEntityNameRawTextFromTypeId = (typeId: string): mc.RawText => {
+	const namespace = typeId.split(":")[0];
+	const entityTypeId = namespace === "minecraft" ? typeId.replace("minecraft:", "") : typeId;
+	return { rawtext: [{ translate: `entity.${entityTypeId}.name` }] };
 };
 
 /**
@@ -127,15 +156,4 @@ export const getEntityNameRawText = (entity: mc.Entity | string): mc.RawText => 
 		// In case of any error, return 'Unknown'
 		return { rawtext: [{ text: "Unknown" }] };
 	}
-};
-
-/**
- * Returns a RawText object with the translated name for a given entity type ID.
- * @param typeId - The entity type ID (e.g., "minecraft:zombie").
- * @returns A RawText object with the translation key for the entity name.
- */
-const getEntityNameRawTextFromTypeId = (typeId: string): mc.RawText => {
-	const namespace = typeId.split(":")[0];
-	const entityTypeId = namespace === "minecraft" ? typeId.replace("minecraft:", "") : typeId;
-	return { rawtext: [{ translate: `entity.${entityTypeId}.name` }] };
 };
