@@ -4,9 +4,9 @@
  * @param item - The item to check.
  * @returns True if the item is a non-null, non-array object, false otherwise.
  */
-export function isRecordObject(item: unknown): item is Record<string, any> {
+export const isRecordObject = (item: unknown): item is Record<string, any> => {
 	return item != null && typeof item === "object" && !Array.isArray(item);
-}
+};
 
 /**
  * Deeply merges two objects.
@@ -24,10 +24,10 @@ export function isRecordObject(item: unknown): item is Record<string, any> {
  * // Output: { a: 1, b: { c: 4, d: 3, f: 6 }, e: { h: 8 }, g: 7 }
  * ```
  */
-export function deepMerge<T extends Record<string, any>, U extends Record<string, any>>(
+export const deepMerge = <T extends Record<string, any>, U extends Record<string, any>>(
 	target: T,
 	source: U,
-): T & U {
+): T & U => {
 	// Create a new object to avoid modifying the original target.
 	const output = { ...target } as T & U;
 
@@ -51,7 +51,7 @@ export function deepMerge<T extends Record<string, any>, U extends Record<string
 	}
 
 	return output;
-}
+};
 
 /**
  * Recursively compares two objects for deep equality.
@@ -61,7 +61,7 @@ export function deepMerge<T extends Record<string, any>, U extends Record<string
  * @param obj2 - The second object to compare.
  * @returns `true` if the objects are deeply equal, `false` otherwise.
  */
-export function areObjectsEqual(obj1: any, obj2: any): boolean {
+export const areObjectsEqual = (obj1: any, obj2: any): boolean => {
 	if (obj1 === obj2) {
 		return true;
 	}
@@ -107,4 +107,4 @@ export function areObjectsEqual(obj1: any, obj2: any): boolean {
 	}
 
 	return true;
-}
+};
