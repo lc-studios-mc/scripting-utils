@@ -1,52 +1,79 @@
 import * as mc from "@minecraft/server";
 import { HookedItem, type HookedItemEvents } from "./item-hook.js";
 
+/** Defines the interface for a state machine, which manages and transitions between different states. */
+export interface StateMachine<TState> {
+	/** The current active state of the state machine. */
+	state: TState;
+	/**
+	 * Transitions the state machine to a new state.
+	 * @param newState The new state to transition to.
+	 */
+	changeState(newState: TState): void;
+}
+
 /**
+ * Abstract base class for defining states within a state machine, particularly for {@link HookedItem} instances.
+ * This class provides lifecycle methods that are called during state transitions and game ticks,
+ * allowing subclasses to define specific behaviors for different item states.
+ *
+ * **NOTE: There is no predefined state machine logic in item hook, and you have to create your own.**
+ *
  * @example
  * ```typescript
- * class ExampleHookedItem extends HookedItem implements StateDrivenHookedItem<ExampleHookedItem, ExampleAbstractState> {
+ * // A custom HookedItem that uses a state machine
+ * class CustomHookedItem extends HookedItem implements StateMachine<CustomAbstractState> {
  *   // ...
- *   state: ExampleAbstractState;
- *   changeState(newState: ExampleAbstractState): void {
- *     this.state.onExit();
- *     this.state = newState;
- *     this.state.onEnter();
+ *   state: CustomAbstractState;
  *
- *     // Just an example of calling a custom state method; you should not do it here.
+ *   changeState(newState: CustomAbstractState): void {
+ *     this.state.onExit();
+ *     this.state = newState; // Transition to the new state
+ *     this.state.onEnter();
+ *   }
+ *
+ *   doSomething1(): void {
  *     this.state.customStateMethod();
+ *   }
+ *
+ *   doSomething2(): void {
+ *     this.changeState(new CustomConcreteState(this));
  *   }
  *   // ...
  * }
  *
- * abstract class ExampleAbstractState extends AbstractHookedItemState<ExampleHookedItem> {
+ * // Abstract base class for custom states, extending HookedItemState.
+ * abstract class CustomAbstractState extends HookedItemState<CustomHookedItem> {
  *   abstract customStateMethod(): void;
  * }
  *
- * class ExampleState1 extends ExampleAbstractState {
+ * // Concrete implementation of a custom state.
+ * class CustomConcreteState extends CustomAbstractState {
  *   override customStateMethod(): void {
- *     // ...
+ *     this.owner.player.sendMessage("Greetings from the custom state method!");
  *   }
  * }
  * ```
  */
-export interface StateDrivenHookedItem<T1 extends HookedItem, T2 = AbstractHookedItemState<T1>> {
-	state: T2;
-	changeState(newState: T2): void;
-}
-
-export abstract class AbstractHookedItemState<T extends HookedItem> implements HookedItemEvents {
+export abstract class HookedItemState<TOwner extends HookedItem = HookedItem>
+	implements HookedItemEvents
+{
 	private _currentTick = 0;
 
-	constructor(public readonly sm: T) {}
+	constructor(public readonly owner: TOwner) {}
 
+	/** Gets the number of ticks this state has been active. */
 	get currentTick(): number {
 		return this._currentTick;
 	}
 
+	/** Custom hooked item (state machine) should call this method when the state enters. */
 	onEnter(): void {}
 
+	/** Custom hooked item (state machine) should call this method when the state exits. */
 	onExit(): void {}
 
+	/** Custom hooked item (state machine) should call this method from within `HookedItem.onDelete()`. */
 	onDelete(): void {}
 
 	/**
@@ -65,19 +92,26 @@ export abstract class AbstractHookedItemState<T extends HookedItem> implements H
 	 */
 	onTick(currentItemStack: mc.ItemStack): void {}
 
+	/** Custom hooked item (state machine) should call this method from within `HookedItem.canUse()`. */
 	canUse(e: mc.ItemStartUseAfterEvent): boolean {
 		return true;
 	}
 
+	/** Custom hooked item (state machine) should call this method from within `HookedItem.onStartUse()`. */
 	onStartUse(e: mc.ItemStartUseAfterEvent): void {}
 
+	/** Custom hooked item (state machine) should call this method from within `HookedItem.onStopUse()`. */
 	onStopUse(e: mc.ItemStopUseAfterEvent): void {}
 
+	/** Custom hooked item (state machine) should call this method from within `HookedItem.onHitEntity()`. */
 	onHitEntity(e: mc.EntityHitEntityAfterEvent): void {}
 
+	/** Custom hooked item (state machine) should call this method from within `HookedItem.onHitBlock()`. */
 	onHitBlock(e: mc.EntityHitBlockAfterEvent): void {}
 
+	/** Custom hooked item (state machine) should call this method from within `HookedItem.onBreakBlock()`. */
 	onBreakBlock(e: mc.PlayerBreakBlockAfterEvent): void {}
 
+	/** Custom hooked item (state machine) should call this method from within `HookedItem.onHurt()`. */
 	onHurt(e: mc.EntityHurtAfterEvent): void {}
 }
