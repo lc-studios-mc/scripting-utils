@@ -1,5 +1,6 @@
 import * as mc from "@minecraft/server";
 import { addItemsToContainerOrDrop } from "./container.js";
+import { Vec3 } from "./vec3.js";
 
 /**
  * Checks if the given entity is alive (i.e., has health greater than 0 and is valid).
@@ -176,3 +177,15 @@ export const getEntityNameRawText = (entity: mc.Entity | string): mc.RawText => 
 		return { rawtext: [{ text: "Unknown" }] };
 	}
 };
+
+/**
+ * Calculates a location in front of an entity's head, based on its view direction.
+ * This is useful for placing objects or effects directly in front of where the entity is looking.
+ *
+ * @param entity - The entity whose front-facing location is to be calculated.
+ * @param scaleForward - An optional multiplier to scale how far forward the location should be from the entity's head.
+ * A value of 1 means the location will be 1 unit in the direction the entity is looking.
+ * @returns A new Vector3 representing the calculated location in front of the entity.
+ */
+export const getEntityHeadFrontLocation = (entity: mc.Entity, scaleForward = 1): mc.Vector3 =>
+	Vec3.add(entity.getHeadLocation(), Vec3.scale(entity.getViewDirection(), scaleForward));
