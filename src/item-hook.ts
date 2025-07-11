@@ -61,10 +61,22 @@ const mainItemHookRegistry = {
  */
 export const ItemHookRegistry: ItemHookRegistry = mainItemHookRegistry;
 
+export interface HookedItemEvents {
+	onDelete(): void;
+	onTick(currentItemStack: mc.ItemStack): void;
+	canUse(e: mc.ItemStartUseAfterEvent): boolean;
+	onStartUse(e: mc.ItemStartUseAfterEvent): void;
+	onStopUse(e: mc.ItemStopUseAfterEvent): void;
+	onHitEntity(e: mc.EntityHitEntityAfterEvent): void;
+	onHitBlock(e: mc.EntityHitBlockAfterEvent): void;
+	onBreakBlock(e: mc.PlayerBreakBlockAfterEvent): void;
+	onHurt(e: mc.EntityHurtAfterEvent): void;
+}
+
 /**
  * Base class for custom hooked item logic. Extend to implement item behavior.
  */
-export abstract class HookedItem {
+export abstract class HookedItem implements HookedItemEvents {
 	private readonly context: HookedItemContext;
 
 	constructor(context: HookedItemContext) {
