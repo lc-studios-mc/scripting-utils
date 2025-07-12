@@ -9,5 +9,6 @@ export * from "./item-hook.js";
 export * from "./math.js";
 export * from "./misc.js";
 export * from "./player.js";
+export * from "./state-driven-hooked-item.js";
 export * from "./timeline.js";
 export * from "./vec3.js";
