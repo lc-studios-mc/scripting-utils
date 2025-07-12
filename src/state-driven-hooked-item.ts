@@ -127,9 +127,9 @@ export abstract class StateDrivenHookedItem<TState extends HookedItemState = Hoo
 	abstract state: TState;
 
 	changeState(newState: TState): void {
-		this.state.onEnter();
-		this.state = newState;
 		this.state.onExit();
+		this.state = newState;
+		this.state.onEnter();
 	}
 
 	override onDelete(): void {
