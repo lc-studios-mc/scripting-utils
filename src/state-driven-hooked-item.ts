@@ -1,5 +1,5 @@
 import * as mc from "@minecraft/server";
-import { HookedItem, type HookedItemEvents } from "./item-hook.js";
+import { HookedItem, type HookedItemContext, type HookedItemEvents } from "./item-hook.js";
 
 /** Defines the interface for a state machine, which manages and transitions between different states. */
 export interface StateMachine<TState> {
@@ -114,4 +114,57 @@ export abstract class HookedItemState<TOwner extends HookedItem = HookedItem>
 
 	/** Custom hooked item (state machine) should call this method from within `HookedItem.onHurt()`. */
 	onHurt(e: mc.EntityHurtAfterEvent): void {}
+}
+
+export abstract class StateDrivenHookedItem<TState extends HookedItemState = HookedItemState>
+	extends HookedItem
+	implements StateMachine<TState>
+{
+	constructor(ctx: HookedItemContext) {
+		super(ctx);
+	}
+
+	abstract state: TState;
+
+	changeState(newState: TState): void {
+		this.state.onEnter();
+		this.state = newState;
+		this.state.onExit();
+	}
+
+	override onDelete(): void {
+		this.state.onDelete();
+	}
+
+	override onTick(currentItemStack: mc.ItemStack): void {
+		this.state.update(currentItemStack);
+	}
+
+	override canUse(e: mc.ItemStartUseAfterEvent): boolean {
+		return this.state.canUse(e);
+	}
+
+	override onStartUse(e: mc.ItemStartUseAfterEvent): void {
+		this.state.onStartUse(e);
+	}
+
+	override onStopUse(e: mc.ItemStopUseAfterEvent): void {
+		this.state.onStopUse(e);
+	}
+
+	override onHitEntity(e: mc.EntityHitEntityAfterEvent): void {
+		this.state.onHitEntity(e);
+	}
+
+	override onHitBlock(e: mc.EntityHitBlockAfterEvent): void {
+		this.state.onHitBlock(e);
+	}
+
+	override onBreakBlock(e: mc.PlayerBreakBlockAfterEvent): void {
+		this.state.onBreakBlock(e);
+	}
+
+	override onHurt(e: mc.EntityHurtAfterEvent): void {
+		this.state.onHurt(e);
+	}
 }
