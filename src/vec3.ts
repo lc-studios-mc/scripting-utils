@@ -10,7 +10,7 @@ import { randf } from "./math.js";
  * ```typescript
  * // Pure static methods
  * const example1 = Vec3.add({ x: 1, y: 2, z: 3 }, { x: 4, y: 5, z: 6 })
- * console.log(Vec3.toString(example1)); // (5, 7, 9)
+ * console.log(Vec3.stringify(example1)); // (5, 7, 9)
  *
  * // Easily combine multiple operations with method chain
  * const example2 = new Vec3()
@@ -554,7 +554,7 @@ export class Vec3 implements Vector3 {
 	 * @param format - Format of the string.
 	 * - `0`: "`(x, y, z)`"
 	 * - `1`: "`x y z`"
-	 * - `2`: "`x=x y=y z=z`"
+	 * - `2`: "`x=x,y=y,z=z`"
 	 *
 	 * @returns String representation of the specified Vector3 object.
 	 */
@@ -572,17 +572,17 @@ export class Vec3 implements Vector3 {
 		}
 	}
 
-	/** @deprecated Use `stringify()` instead. */
+	/** @deprecated Use `stringify()` with `format` arg set to `0` instead instead. */
 	static toString<T extends Vector3>(vec: T): `(${T["x"]}, ${T["y"]}, ${T["z"]})` {
 		return `(${vec.x}, ${vec.y}, ${vec.z})`;
 	}
 
-	/** @deprecated Use `stringify()` instead. */
+	/** @deprecated Use `stringify()` with `format` arg set to `1` instead instead. */
 	static toString2<T extends Vector3>(vec: T): `${T["x"]} ${T["y"]} ${T["z"]}` {
 		return `${vec.x} ${vec.y} ${vec.z}`;
 	}
 
-	/** @deprecated Use `stringify()` instead. */
+	/** @deprecated Use `stringify()` with `format` arg set to `2` instead instead. */
 	static toString3<T extends Vector3>(vec: T): `x=${T["x"]},y=${T["y"]},z=${T["z"]}` {
 		return `x=${vec.x},y=${vec.y},z=${vec.z}`;
 	}
@@ -803,7 +803,7 @@ export class Vec3 implements Vector3 {
 	 * @param format - Format of the string.
 	 * - `0`: "`(x, y, z)`"
 	 * - `1`: "`x y z`"
-	 * - `2`: "`x=x y=y z=z`"
+	 * - `2`: "`x=x,y=y,z=z`"
 	 *
 	 * @returns String representation of this vector.
 	 */
