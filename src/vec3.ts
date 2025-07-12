@@ -549,27 +549,40 @@ export class Vec3 implements Vector3 {
 
 	/**
 	 * Converts a Vector3 object into a string.
-	 * @param vec - The Vector3 object.
-	 * @returns "`(x, y, z)`"
+	 *
+	 * @param value - The Vector3 object.
+	 * @param format - Format of the string.
+	 * - `0`: "`(x, y, z)`"
+	 * - `1`: "`x y z`"
+	 * - `2`: "`x=x y=y z=z`"
+	 *
+	 * @returns String representation of the specified Vector3 object.
 	 */
+	static stringify(value?: Partial<Vector3>, format: 0 | 1 | 2 = 0): string {
+		const vec = Vec3.create(value);
+
+		switch (format) {
+			default:
+			case 0:
+				return `(${vec.x}, ${vec.y}, ${vec.z})`;
+			case 1:
+				return `${vec.x} ${vec.y} ${vec.z}`;
+			case 2:
+				return `x=${vec.x},y=${vec.y},z=${vec.z}`;
+		}
+	}
+
+	/** @deprecated Use `stringify()` instead. */
 	static toString<T extends Vector3>(vec: T): `(${T["x"]}, ${T["y"]}, ${T["z"]})` {
 		return `(${vec.x}, ${vec.y}, ${vec.z})`;
 	}
 
-	/**
-	 * Converts a Vector3 object into a string.
-	 * @param vec - The Vector3 object.
-	 * @returns "`x y z`"
-	 */
+	/** @deprecated Use `stringify()` instead. */
 	static toString2<T extends Vector3>(vec: T): `${T["x"]} ${T["y"]} ${T["z"]}` {
 		return `${vec.x} ${vec.y} ${vec.z}`;
 	}
 
-	/**
-	 * Converts a Vector3 object into a string.
-	 * @param vec - The Vector3 object.
-	 * @returns "`x=x,y=y,z=z`"
-	 */
+	/** @deprecated Use `stringify()` instead. */
 	static toString3<T extends Vector3>(vec: T): `x=${T["x"]},y=${T["y"]},z=${T["z"]}` {
 		return `x=${vec.x},y=${vec.y},z=${vec.z}`;
 	}
@@ -785,25 +798,25 @@ export class Vec3 implements Vector3 {
 	}
 
 	/**
-	 * Converts this vector to a string in the form (x, y, z).
-	 * @returns The string representation.
+	 * Converts this vector into a string.
+	 *
+	 * @param format - Format of the string.
+	 * - `0`: "`(x, y, z)`"
+	 * - `1`: "`x y z`"
+	 * - `2`: "`x=x y=y z=z`"
+	 *
+	 * @returns String representation of this vector.
 	 */
-	toString(): string {
-		return Vec3.toString(this._vec);
+	toString(format: 0 | 1 | 2 = 0): string {
+		return Vec3.stringify(this._vec, format);
 	}
 
-	/**
-	 * Converts this vector to a string in the form "x y z".
-	 * @returns The string representation.
-	 */
+	/** @deprecated Use `toString()` with `format` arg set to `1` instead. */
 	toString2(): string {
 		return Vec3.toString2(this._vec);
 	}
 
-	/**
-	 * Converts this vector to a string in the form "x=x,y=y,z=z".
-	 * @returns The string representation.
-	 */
+	/** @deprecated Use `toString()` with `format` arg set to `2` instead. */
 	toString3(): string {
 		return Vec3.toString3(this._vec);
 	}
