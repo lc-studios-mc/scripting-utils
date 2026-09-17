@@ -1,6 +1,3 @@
-// Copyright (c) 2026 LuckedCoronet
-// SPDX-License-Identifier: MIT
-
 /**
  * Clamps a number between a minimum and maximum value.
  *
