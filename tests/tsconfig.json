@@ -1,0 +1,15 @@
+{
+	"extends": "../tsconfig.base.json",
+	"compilerOptions": {
+		"paths": {
+			"@src/*": ["../src/*"],
+			"@tests/*": ["./*"]
+		},
+		"module": "esnext",
+		"moduleResolution": "bundler",
+		"target": "esnext",
+		"lib": ["esnext"],
+		"types": ["bun"]
+	},
+	"include": ["../src/**/*", "./**/*"]
+}

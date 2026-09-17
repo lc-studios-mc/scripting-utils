@@ -1,0 +1,13 @@
+{
+	"compilerOptions": {
+		"moduleDetection": "force",
+		"allowJs": true,
+		"checkJs": true,
+		"strict": true,
+		"noUncheckedIndexedAccess": true,
+		"noUncheckedSideEffectImports": true,
+		"noImplicitOverride": true,
+		"skipLibCheck": true,
+		"noEmit": true
+	}
+}

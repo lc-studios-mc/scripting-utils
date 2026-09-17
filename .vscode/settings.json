@@ -1,0 +1,13 @@
+{
+	"editor.defaultFormatter": "esbenp.prettier-vscode",
+	"editor.formatOnSave": true,
+	"editor.insertSpaces": false,
+	"editor.rulers": [100],
+	"files.eol": "\n",
+	"npm.packageManager": "bun",
+	"[markdown]": {
+		"editor.insertSpaces": true,
+		"editor.tabSize": 2,
+		"editor.rulers": [80]
+	}
+}
