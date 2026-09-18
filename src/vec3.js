@@ -2,6 +2,45 @@ import { clampNumber, degToRad } from "./number.js";
 
 /** @import { Vector2, Vector3 } from "@minecraft/server" */
 
+/** Zero vector: `{ x: 0, y: 0, z: 0 }`. @type {Readonly<Vector3>} */
+export const ZERO = Object.freeze({ x: 0, y: 0, z: 0 });
+
+/** All-ones vector: `{ x: 1, y: 1, z: 1 }`. @type {Readonly<Vector3>} */
+export const ONE = Object.freeze({ x: 1, y: 1, z: 1 });
+
+/** Half vector: `{ x: 0.5, y: 0.5, z: 0.5 }`. @type {Readonly<Vector3>} */
+export const HALF = Object.freeze({ x: 0.5, y: 0.5, z: 0.5 });
+
+/** Up direction: `{ x: 0, y: 1, z: 0 }`. @type {Readonly<Vector3>} */
+export const UP = Object.freeze({ x: 0, y: 1, z: 0 });
+
+/** Down direction: `{ x: 0, y: -1, z: 0 }`. @type {Readonly<Vector3>} */
+export const DOWN = Object.freeze({ x: 0, y: -1, z: 0 });
+
+/** North direction: `{ x: 0, y: 0, z: -1 }`. @type {Readonly<Vector3>} */
+export const NORTH = Object.freeze({ x: 0, y: 0, z: -1 });
+
+/** South direction: `{ x: 0, y: 0, z: 1 }`. @type {Readonly<Vector3>} */
+export const SOUTH = Object.freeze({ x: 0, y: 0, z: 1 });
+
+/** East direction: `{ x: 1, y: 0, z: 0 }`. @type {Readonly<Vector3>} */
+export const EAST = Object.freeze({ x: 1, y: 0, z: 0 });
+
+/** West direction: `{ x: -1, y: 0, z: 0 }`. @type {Readonly<Vector3>} */
+export const WEST = Object.freeze({ x: -1, y: 0, z: 0 });
+
+/** Alias of {@link SOUTH}. @type {Readonly<Vector3>} */
+export const FORWARD = SOUTH;
+
+/** Alias of {@link NORTH}. @type {Readonly<Vector3>} */
+export const BACK = NORTH;
+
+/** Alias of {@link EAST}. @type {Readonly<Vector3>} */
+export const RIGHT = EAST;
+
+/** Alias of {@link WEST}. @type {Readonly<Vector3>} */
+export const LEFT = WEST;
+
 /**
  * Creates a new vector.
  *
