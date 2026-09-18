@@ -1,4 +1,4 @@
-import { degToRad } from "./number.js";
+import { clampNumber, degToRad } from "./number.js";
 
 /** @import { Vector2, Vector3 } from "@minecraft/server" */
 
@@ -350,6 +350,55 @@ export function ceil(v, out = v) {
 	out.x = Math.ceil(v.x);
 	out.y = Math.ceil(v.y);
 	out.z = Math.ceil(v.z);
+	return out;
+}
+
+/**
+ * Clamps `v`'s components between the corresponding components of `min` and `max`.
+ *
+ * @param {Vector3} v - The vector to clamp.
+ * @param {Vector3} min - Per-component minimum values.
+ * @param {Vector3} max - Per-component maximum values.
+ * @param {Vector3} [out] - Vector to write the result to. Defaults to `v`.
+ * @returns {Vector3} The mutated `out`.
+ */
+export function clamp(v, min, max, out = v) {
+	out.x = clampNumber(v.x, min.x, max.x);
+	out.y = clampNumber(v.y, min.y, max.y);
+	out.z = clampNumber(v.z, min.z, max.z);
+	return out;
+}
+
+/**
+ * Linearly interpolates between `v1` and `v2` by `t`.
+ *
+ * @param {Vector3} v1 - The vector to interpolate from.
+ * @param {Vector3} v2 - The vector to interpolate to.
+ * @param {number} t - Interpolation factor, typically between 0 and 1.
+ * @param {Vector3} [out] - Vector to write the result to. Defaults to `v1`.
+ * @returns {Vector3} The mutated `out`.
+ */
+export function lerp(v1, v2, t, out = v1) {
+	const x = v1.x + (v2.x - v1.x) * t;
+	const y = v1.y + (v2.y - v1.y) * t;
+	const z = v1.z + (v2.z - v1.z) * t;
+	out.x = x;
+	out.y = y;
+	out.z = z;
+	return out;
+}
+
+/**
+ * Flips the sign of `v`'s components.
+ *
+ * @param {Vector3} v - The vector to negate.
+ * @param {Vector3} [out] - Vector to write the result to. Defaults to `v`.
+ * @returns {Vector3} The mutated `out`.
+ */
+export function negate(v, out = v) {
+	out.x = -v.x;
+	out.y = -v.y;
+	out.z = -v.z;
 	return out;
 }
 

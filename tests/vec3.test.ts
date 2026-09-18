@@ -420,6 +420,80 @@ describe("ceil", () => {
 	});
 });
 
+describe("clamp", () => {
+	it("clamps each component between min and max and mutates v", () => {
+		const v = { x: -5, y: 5, z: 2 };
+		const result = Vec3.clamp(v, { x: 0, y: 0, z: 0 }, { x: 10, y: 3, z: 10 });
+		expect(result).toBe(v);
+		expect(v).toEqual({ x: 0, y: 3, z: 2 });
+	});
+
+	it("leaves components within range unchanged", () => {
+		const v = { x: 5, y: 5, z: 5 };
+		Vec3.clamp(v, { x: 0, y: 0, z: 0 }, { x: 10, y: 10, z: 10 });
+		expect(v).toEqual({ x: 5, y: 5, z: 5 });
+	});
+
+	it("writes the result to out and leaves v unmutated when out is given", () => {
+		const v = { x: -5, y: 5, z: 20 };
+		const out = { x: 0, y: 0, z: 0 };
+		const result = Vec3.clamp(v, { x: 0, y: 0, z: 0 }, { x: 10, y: 3, z: 10 }, out);
+		expect(result).toBe(out);
+		expect(out).toEqual({ x: 0, y: 3, z: 10 });
+		expect(v).toEqual({ x: -5, y: 5, z: 20 });
+	});
+});
+
+describe("lerp", () => {
+	it("returns v1 unchanged at t=0", () => {
+		const v1 = { x: 0, y: 0, z: 0 };
+		Vec3.lerp(v1, { x: 10, y: 20, z: 30 }, 0);
+		expect(v1).toEqual({ x: 0, y: 0, z: 0 });
+	});
+
+	it("returns v2 at t=1 and mutates v1", () => {
+		const v1 = { x: 0, y: 0, z: 0 };
+		const result = Vec3.lerp(v1, { x: 10, y: 20, z: 30 }, 1);
+		expect(result).toBe(v1);
+		expect(v1).toEqual({ x: 10, y: 20, z: 30 });
+	});
+
+	it("returns the midpoint at t=0.5", () => {
+		const v1 = { x: 0, y: 0, z: 0 };
+		Vec3.lerp(v1, { x: 10, y: 20, z: 30 }, 0.5);
+		expect(v1).toEqual({ x: 5, y: 10, z: 15 });
+	});
+
+	it("writes the result to out and leaves inputs unmutated when out is given", () => {
+		const v1 = { x: 0, y: 0, z: 0 };
+		const v2 = { x: 10, y: 20, z: 30 };
+		const out = { x: 0, y: 0, z: 0 };
+		const result = Vec3.lerp(v1, v2, 0.5, out);
+		expect(result).toBe(out);
+		expect(out).toEqual({ x: 5, y: 10, z: 15 });
+		expect(v1).toEqual({ x: 0, y: 0, z: 0 });
+		expect(v2).toEqual({ x: 10, y: 20, z: 30 });
+	});
+});
+
+describe("negate", () => {
+	it("flips the sign of each component and mutates v", () => {
+		const v = { x: 1, y: -2, z: 3 };
+		const result = Vec3.negate(v);
+		expect(result).toBe(v);
+		expect(v).toEqual({ x: -1, y: 2, z: -3 });
+	});
+
+	it("writes the result to out and leaves v unmutated when out is given", () => {
+		const v = { x: 1, y: -2, z: 3 };
+		const out = { x: 0, y: 0, z: 0 };
+		const result = Vec3.negate(v, out);
+		expect(result).toBe(out);
+		expect(out).toEqual({ x: -1, y: 2, z: -3 });
+		expect(v).toEqual({ x: 1, y: -2, z: 3 });
+	});
+});
+
 describe("resolveLocalOffsets", () => {
 	it("maps local axes onto world axes when rotation is zero", () => {
 		const origin = { x: 0, y: 0, z: 0 };
