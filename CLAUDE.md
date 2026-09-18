@@ -32,6 +32,8 @@ convention the file you're editing already uses.
 - JSDoc required on all exported functions in `src/`.
 - Ensure type safety (check via `bun run typecheck`).
 - Format touched files before commiting.
+- Write tests based on the intended/expected behavior — don't assume the current
+  implementation is correct.
 
 ## Notes
 
