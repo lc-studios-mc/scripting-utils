@@ -171,3 +171,12 @@ describe("floor", () => {
 		expect(v).toEqual({ x: 1, y: -2, z: 2 });
 	});
 });
+
+describe("round", () => {
+	it("rounds v's components to the nearest integer and mutates v", () => {
+		const v = { x: 1.4, y: -1.5, z: 2.5 };
+		const result = Vec3.round(v);
+		expect(result).toBe(v);
+		expect(v).toEqual({ x: 1, y: -1, z: 3 });
+	});
+});

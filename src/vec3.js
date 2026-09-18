@@ -229,3 +229,16 @@ export function floor(v) {
 	v.z = Math.floor(v.z);
 	return v;
 }
+
+/**
+ * Rounds `v`'s components to the nearest integer, mutating it in place.
+ *
+ * @param {Vector3} v - The vector to mutate.
+ * @returns {Vector3} The mutated `v`.
+ */
+export function round(v) {
+	v.x = Math.round(v.x);
+	v.y = Math.round(v.y);
+	v.z = Math.round(v.z);
+	return v;
+}
