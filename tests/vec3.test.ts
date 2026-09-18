@@ -494,6 +494,103 @@ describe("negate", () => {
 	});
 });
 
+describe("equals", () => {
+	it("returns true for vectors with identical components", () => {
+		expect(Vec3.equals({ x: 1, y: 2, z: 3 }, { x: 1, y: 2, z: 3 })).toBe(true);
+	});
+
+	it("returns false when any component differs", () => {
+		expect(Vec3.equals({ x: 1, y: 2, z: 3 }, { x: 1, y: 2, z: 4 })).toBe(false);
+	});
+
+	it("returns false for components that differ by a tiny amount", () => {
+		expect(Vec3.equals({ x: 1, y: 2, z: 3 }, { x: 1.0000001, y: 2, z: 3 })).toBe(false);
+	});
+});
+
+describe("almostEquals", () => {
+	it("returns true for identical vectors", () => {
+		expect(Vec3.almostEquals({ x: 1, y: 2, z: 3 }, { x: 1, y: 2, z: 3 })).toBe(true);
+	});
+
+	it("returns true for components within the default epsilon", () => {
+		expect(Vec3.almostEquals({ x: 1, y: 2, z: 3 }, { x: 1.0000001, y: 2, z: 3 })).toBe(true);
+	});
+
+	it("returns false for components outside the default epsilon", () => {
+		expect(Vec3.almostEquals({ x: 1, y: 2, z: 3 }, { x: 1.1, y: 2, z: 3 })).toBe(false);
+	});
+
+	it("respects a custom epsilon", () => {
+		expect(Vec3.almostEquals({ x: 1, y: 2, z: 3 }, { x: 1.05, y: 2, z: 3 }, 0.1)).toBe(true);
+		expect(Vec3.almostEquals({ x: 1, y: 2, z: 3 }, { x: 1.2, y: 2, z: 3 }, 0.1)).toBe(false);
+	});
+});
+
+describe("angleBetween", () => {
+	it("returns 0 for parallel vectors", () => {
+		expect(Vec3.angleBetween({ x: 1, y: 0, z: 0 }, { x: 5, y: 0, z: 0 })).toBeCloseTo(0);
+	});
+
+	it("returns PI/2 for orthogonal vectors", () => {
+		expect(Vec3.angleBetween({ x: 1, y: 0, z: 0 }, { x: 0, y: 1, z: 0 })).toBeCloseTo(
+			Math.PI / 2,
+		);
+	});
+
+	it("returns PI for opposing vectors", () => {
+		expect(Vec3.angleBetween({ x: 1, y: 0, z: 0 }, { x: -1, y: 0, z: 0 })).toBeCloseTo(Math.PI);
+	});
+});
+
+describe("slerp", () => {
+	it("returns v1 unchanged at t=0", () => {
+		const v1 = { x: 1, y: 0, z: 0 };
+		Vec3.slerp(v1, { x: 0, y: 1, z: 0 }, 0);
+		expect(v1.x).toBeCloseTo(1);
+		expect(v1.y).toBeCloseTo(0);
+		expect(v1.z).toBeCloseTo(0);
+	});
+
+	it("returns v2 at t=1 and mutates v1", () => {
+		const v1 = { x: 1, y: 0, z: 0 };
+		const result = Vec3.slerp(v1, { x: 0, y: 1, z: 0 }, 1);
+		expect(result).toBe(v1);
+		expect(v1.x).toBeCloseTo(0);
+		expect(v1.y).toBeCloseTo(1);
+		expect(v1.z).toBeCloseTo(0);
+	});
+
+	it("preserves magnitude and bisects the angle at t=0.5 for equal-length orthogonal vectors", () => {
+		const v1 = { x: 1, y: 0, z: 0 };
+		Vec3.slerp(v1, { x: 0, y: 1, z: 0 }, 0.5);
+		expect(Vec3.length(v1)).toBeCloseTo(1);
+		expect(v1.x).toBeCloseTo(Math.SQRT1_2);
+		expect(v1.y).toBeCloseTo(Math.SQRT1_2);
+		expect(v1.z).toBeCloseTo(0);
+	});
+
+	it("falls back to linear interpolation for near-identical directions", () => {
+		const v1 = { x: 1, y: 0, z: 0 };
+		Vec3.slerp(v1, { x: 1, y: 0, z: 0 }, 0.5);
+		expect(v1.x).toBeCloseTo(1);
+		expect(v1.y).toBeCloseTo(0);
+		expect(v1.z).toBeCloseTo(0);
+	});
+
+	it("writes the result to out and leaves inputs unmutated when out is given", () => {
+		const v1 = { x: 1, y: 0, z: 0 };
+		const v2 = { x: 0, y: 1, z: 0 };
+		const out = { x: 0, y: 0, z: 0 };
+		const result = Vec3.slerp(v1, v2, 0.5, out);
+		expect(result).toBe(out);
+		expect(out.x).toBeCloseTo(Math.SQRT1_2);
+		expect(out.y).toBeCloseTo(Math.SQRT1_2);
+		expect(v1).toEqual({ x: 1, y: 0, z: 0 });
+		expect(v2).toEqual({ x: 0, y: 1, z: 0 });
+	});
+});
+
 describe("resolveLocalOffsets", () => {
 	it("maps local axes onto world axes when rotation is zero", () => {
 		const origin = { x: 0, y: 0, z: 0 };

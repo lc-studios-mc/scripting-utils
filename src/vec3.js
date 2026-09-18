@@ -403,6 +403,72 @@ export function negate(v, out = v) {
 }
 
 /**
+ * Checks whether `v1` and `v2` have exactly equal components.
+ *
+ * @param {Vector3} v1 - The first vector.
+ * @param {Vector3} v2 - The second vector.
+ * @returns {boolean} Whether `v1` and `v2` are exactly equal.
+ */
+export function equals(v1, v2) {
+	return v1.x === v2.x && v1.y === v2.y && v1.z === v2.z;
+}
+
+/**
+ * Checks whether `v1` and `v2` are equal within `epsilon`.
+ *
+ * @param {Vector3} v1 - The first vector.
+ * @param {Vector3} v2 - The second vector.
+ * @param {number} [epsilon] - Maximum allowed difference per component. Defaults to `1e-6`.
+ * @returns {boolean} Whether `v1` and `v2` are approximately equal.
+ */
+export function almostEquals(v1, v2, epsilon = 1e-6) {
+	return (
+		Math.abs(v1.x - v2.x) <= epsilon &&
+		Math.abs(v1.y - v2.y) <= epsilon &&
+		Math.abs(v1.z - v2.z) <= epsilon
+	);
+}
+
+/**
+ * Calculates the angle in radians between `v1` and `v2`.
+ *
+ * @param {Vector3} v1 - The first vector.
+ * @param {Vector3} v2 - The second vector.
+ * @returns {number} The angle between `v1` and `v2`, in radians.
+ */
+export function angleBetween(v1, v2) {
+	const cos = dot(v1, v2) / (length(v1) * length(v2));
+	return Math.acos(clampNumber(cos, -1, 1));
+}
+
+/**
+ * Spherically interpolates between `v1` and `v2` by `t`, treating both as directions
+ * from the origin.
+ *
+ * @param {Vector3} v1 - The vector to interpolate from.
+ * @param {Vector3} v2 - The vector to interpolate to.
+ * @param {number} t - Interpolation factor, typically between 0 and 1.
+ * @param {Vector3} [out] - Vector to write the result to. Defaults to `v1`.
+ * @returns {Vector3} The mutated `out`.
+ */
+export function slerp(v1, v2, t, out = v1) {
+	const theta = angleBetween(v1, v2);
+	const sinTheta = Math.sin(theta);
+
+	if (sinTheta < 1e-6) return lerp(v1, v2, t, out);
+
+	const a = Math.sin((1 - t) * theta) / sinTheta;
+	const b = Math.sin(t * theta) / sinTheta;
+	const x = v1.x * a + v2.x * b;
+	const y = v1.y * a + v2.y * b;
+	const z = v1.z * a + v2.z * b;
+	out.x = x;
+	out.y = y;
+	out.z = z;
+	return out;
+}
+
+/**
  * Converts local right/up/forward offsets into world-space points.
  *
  * @param {Vector3} origin - The world-space origin point.
