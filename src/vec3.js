@@ -242,3 +242,16 @@ export function round(v) {
 	v.z = Math.round(v.z);
 	return v;
 }
+
+/**
+ * Rounds `v`'s components up to the nearest integer, mutating it in place.
+ *
+ * @param {Vector3} v - The vector to mutate.
+ * @returns {Vector3} The mutated `v`.
+ */
+export function ceil(v) {
+	v.x = Math.ceil(v.x);
+	v.y = Math.ceil(v.y);
+	v.z = Math.ceil(v.z);
+	return v;
+}

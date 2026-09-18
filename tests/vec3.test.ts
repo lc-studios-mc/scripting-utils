@@ -180,3 +180,12 @@ describe("round", () => {
 		expect(v).toEqual({ x: 1, y: -1, z: 3 });
 	});
 });
+
+describe("ceil", () => {
+	it("rounds v's components up to the nearest integer and mutates v", () => {
+		const v = { x: 1.1, y: -1.9, z: 2.5 };
+		const result = Vec3.ceil(v);
+		expect(result).toBe(v);
+		expect(v).toEqual({ x: 2, y: -1, z: 3 });
+	});
+});
