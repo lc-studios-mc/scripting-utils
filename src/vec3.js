@@ -1,6 +1,16 @@
 /** @import { Vector3 } from "@minecraft/server" */
 
 /**
+ * Creates a new vector with the same components as `v`.
+ *
+ * @param {Vector3} v - The vector to copy.
+ * @returns {Vector3} A new vector with `v`'s components.
+ */
+export function clone(v) {
+	return { x: v.x, y: v.y, z: v.z };
+}
+
+/**
  * Adds another vector's components to `v1`, mutating it in place.
  *
  * @param {Vector3} v1 - The vector to mutate.

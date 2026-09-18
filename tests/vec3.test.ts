@@ -1,6 +1,15 @@
 import { Vec3 } from "@src/index";
 import { describe, expect, it } from "bun:test";
 
+describe("clone", () => {
+	it("creates a new vector with the same components", () => {
+		const v = { x: 1, y: 2, z: 3 };
+		const result = Vec3.clone(v);
+		expect(result).not.toBe(v);
+		expect(result).toEqual({ x: 1, y: 2, z: 3 });
+	});
+});
+
 describe("add", () => {
 	it("adds another vector's components and mutates v1", () => {
 		const v1 = { x: 1, y: 2, z: 3 };
