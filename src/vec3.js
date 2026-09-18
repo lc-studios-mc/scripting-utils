@@ -193,6 +193,65 @@ export function divideScalar(v, scalar, out = v) {
 }
 
 /**
+ * Calculates the dot product of `v1` and `v2`.
+ *
+ * @param {Vector3} v1 - The first vector.
+ * @param {Vector3} v2 - The second vector.
+ * @returns {number} The dot product of `v1` and `v2`.
+ */
+export function dot(v1, v2) {
+	return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+}
+
+/**
+ * Calculates the cross product of `v1` and `v2`.
+ *
+ * @param {Vector3} v1 - The first vector.
+ * @param {Vector3} v2 - The second vector.
+ * @param {Vector3} [out] - Vector to write the result to. Defaults to `v1`.
+ * @returns {Vector3} The mutated `out`.
+ */
+export function cross(v1, v2, out = v1) {
+	const x = v1.y * v2.z - v1.z * v2.y;
+	const y = v1.z * v2.x - v1.x * v2.z;
+	const z = v1.x * v2.y - v1.y * v2.x;
+	out.x = x;
+	out.y = y;
+	out.z = z;
+	return out;
+}
+
+/**
+ * Sets `out`'s components to the smaller of `v1`'s and `v2`'s components.
+ *
+ * @param {Vector3} v1 - The first vector.
+ * @param {Vector3} v2 - The second vector.
+ * @param {Vector3} [out] - Vector to write the result to. Defaults to `v1`.
+ * @returns {Vector3} The mutated `out`.
+ */
+export function min(v1, v2, out = v1) {
+	out.x = Math.min(v1.x, v2.x);
+	out.y = Math.min(v1.y, v2.y);
+	out.z = Math.min(v1.z, v2.z);
+	return out;
+}
+
+/**
+ * Sets `out`'s components to the larger of `v1`'s and `v2`'s components.
+ *
+ * @param {Vector3} v1 - The first vector.
+ * @param {Vector3} v2 - The second vector.
+ * @param {Vector3} [out] - Vector to write the result to. Defaults to `v1`.
+ * @returns {Vector3} The mutated `out`.
+ */
+export function max(v1, v2, out = v1) {
+	out.x = Math.max(v1.x, v2.x);
+	out.y = Math.max(v1.y, v2.y);
+	out.z = Math.max(v1.z, v2.z);
+	return out;
+}
+
+/**
  * Normalizes `v`, making it a unit vector.
  *
  * @param {Vector3} v - The vector to normalize.

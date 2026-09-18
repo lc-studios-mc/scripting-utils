@@ -225,6 +225,97 @@ describe("divideScalar", () => {
 	});
 });
 
+describe("dot", () => {
+	it("returns 0 for orthogonal vectors", () => {
+		expect(Vec3.dot({ x: 1, y: 0, z: 0 }, { x: 0, y: 1, z: 0 })).toBe(0);
+	});
+
+	it("returns the product of magnitudes for parallel vectors", () => {
+		expect(Vec3.dot({ x: 2, y: 0, z: 0 }, { x: 3, y: 0, z: 0 })).toBe(6);
+	});
+
+	it("returns a negative value for opposing vectors", () => {
+		expect(Vec3.dot({ x: 1, y: 0, z: 0 }, { x: -1, y: 0, z: 0 })).toBe(-1);
+	});
+
+	it("computes the dot product for arbitrary vectors", () => {
+		expect(Vec3.dot({ x: 1, y: 2, z: 3 }, { x: 4, y: 5, z: 6 })).toBe(32);
+	});
+});
+
+describe("cross", () => {
+	it("returns the unit z axis for the cross product of unit x and unit y", () => {
+		const v1 = { x: 1, y: 0, z: 0 };
+		const result = Vec3.cross(v1, { x: 0, y: 1, z: 0 });
+		expect(result).toBe(v1);
+		expect(v1).toEqual({ x: 0, y: 0, z: 1 });
+	});
+
+	it("returns the zero vector for parallel vectors", () => {
+		const v1 = { x: 2, y: 0, z: 0 };
+		Vec3.cross(v1, { x: 4, y: 0, z: 0 });
+		expect(v1).toEqual({ x: 0, y: 0, z: 0 });
+	});
+
+	it("writes the result to out and leaves v1 unmutated when out is given", () => {
+		const v1 = { x: 1, y: 0, z: 0 };
+		const v2 = { x: 0, y: 1, z: 0 };
+		const out = { x: 0, y: 0, z: 0 };
+		const result = Vec3.cross(v1, v2, out);
+		expect(result).toBe(out);
+		expect(out).toEqual({ x: 0, y: 0, z: 1 });
+		expect(v1).toEqual({ x: 1, y: 0, z: 0 });
+		expect(v2).toEqual({ x: 0, y: 1, z: 0 });
+	});
+
+	it("is safe when out aliases v1 or v2", () => {
+		const v1 = { x: 1, y: 0, z: 0 };
+		const v2 = { x: 0, y: 1, z: 0 };
+		Vec3.cross(v1, v2, v2);
+		expect(v2).toEqual({ x: 0, y: 0, z: 1 });
+	});
+});
+
+describe("min", () => {
+	it("sets v1 to the component-wise minimum and mutates v1", () => {
+		const v1 = { x: 1, y: 5, z: -3 };
+		const result = Vec3.min(v1, { x: 4, y: 2, z: -1 });
+		expect(result).toBe(v1);
+		expect(v1).toEqual({ x: 1, y: 2, z: -3 });
+	});
+
+	it("writes the result to out and leaves inputs unmutated when out is given", () => {
+		const v1 = { x: 1, y: 5, z: -3 };
+		const v2 = { x: 4, y: 2, z: -1 };
+		const out = { x: 0, y: 0, z: 0 };
+		const result = Vec3.min(v1, v2, out);
+		expect(result).toBe(out);
+		expect(out).toEqual({ x: 1, y: 2, z: -3 });
+		expect(v1).toEqual({ x: 1, y: 5, z: -3 });
+		expect(v2).toEqual({ x: 4, y: 2, z: -1 });
+	});
+});
+
+describe("max", () => {
+	it("sets v1 to the component-wise maximum and mutates v1", () => {
+		const v1 = { x: 1, y: 5, z: -3 };
+		const result = Vec3.max(v1, { x: 4, y: 2, z: -1 });
+		expect(result).toBe(v1);
+		expect(v1).toEqual({ x: 4, y: 5, z: -1 });
+	});
+
+	it("writes the result to out and leaves inputs unmutated when out is given", () => {
+		const v1 = { x: 1, y: 5, z: -3 };
+		const v2 = { x: 4, y: 2, z: -1 };
+		const out = { x: 0, y: 0, z: 0 };
+		const result = Vec3.max(v1, v2, out);
+		expect(result).toBe(out);
+		expect(out).toEqual({ x: 4, y: 5, z: -1 });
+		expect(v1).toEqual({ x: 1, y: 5, z: -3 });
+		expect(v2).toEqual({ x: 4, y: 2, z: -1 });
+	});
+});
+
 describe("normalize", () => {
 	it("normalizes v in place to a unit vector", () => {
 		const v = { x: 3, y: 0, z: 4 };
