@@ -216,3 +216,16 @@ export function distanceSq(v1, v2) {
 	const dz = v1.z - v2.z;
 	return dx * dx + dy * dy + dz * dz;
 }
+
+/**
+ * Rounds `v`'s components down to the nearest integer, mutating it in place.
+ *
+ * @param {Vector3} v - The vector to mutate.
+ * @returns {Vector3} The mutated `v`.
+ */
+export function floor(v) {
+	v.x = Math.floor(v.x);
+	v.y = Math.floor(v.y);
+	v.z = Math.floor(v.z);
+	return v;
+}

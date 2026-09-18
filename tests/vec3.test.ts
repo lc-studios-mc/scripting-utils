@@ -162,3 +162,12 @@ describe("distanceSq", () => {
 		expect(Vec3.distanceSq(v1, v2)).toBe(25);
 	});
 });
+
+describe("floor", () => {
+	it("rounds v's components down to the nearest integer and mutates v", () => {
+		const v = { x: 1.9, y: -1.1, z: 2.5 };
+		const result = Vec3.floor(v);
+		expect(result).toBe(v);
+		expect(v).toEqual({ x: 1, y: -2, z: 2 });
+	});
+});
