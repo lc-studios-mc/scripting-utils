@@ -252,18 +252,30 @@ export function max(v1, v2, out = v1) {
 }
 
 /**
- * Normalizes `v`, making it a unit vector.
+ * Checks whether `v1` and `v2` have exactly equal components.
  *
- * @param {Vector3} v - The vector to normalize.
- * @param {Vector3} [out] - Vector to write the result to. Defaults to `v`.
- * @returns {Vector3} The mutated `out`.
+ * @param {Vector3} v1 - The first vector.
+ * @param {Vector3} v2 - The second vector.
+ * @returns {boolean} Whether `v1` and `v2` are exactly equal.
  */
-export function normalize(v, out = v) {
-	const len = length(v);
-	out.x = v.x / len;
-	out.y = v.y / len;
-	out.z = v.z / len;
-	return out;
+export function equals(v1, v2) {
+	return v1.x === v2.x && v1.y === v2.y && v1.z === v2.z;
+}
+
+/**
+ * Checks whether `v1` and `v2` are equal within `epsilon`.
+ *
+ * @param {Vector3} v1 - The first vector.
+ * @param {Vector3} v2 - The second vector.
+ * @param {number} [epsilon] - Maximum allowed difference per component. Defaults to `1e-6`.
+ * @returns {boolean} Whether `v1` and `v2` are approximately equal.
+ */
+export function almostEquals(v1, v2, epsilon = 1e-6) {
+	return (
+		Math.abs(v1.x - v2.x) <= epsilon &&
+		Math.abs(v1.y - v2.y) <= epsilon &&
+		Math.abs(v1.z - v2.z) <= epsilon
+	);
 }
 
 /**
@@ -284,6 +296,21 @@ export function length(v) {
  */
 export function lengthSq(v) {
 	return v.x * v.x + v.y * v.y + v.z * v.z;
+}
+
+/**
+ * Normalizes `v`, making it a unit vector.
+ *
+ * @param {Vector3} v - The vector to normalize.
+ * @param {Vector3} [out] - Vector to write the result to. Defaults to `v`.
+ * @returns {Vector3} The mutated `out`.
+ */
+export function normalize(v, out = v) {
+	const len = length(v);
+	out.x = v.x / len;
+	out.y = v.y / len;
+	out.z = v.z / len;
+	return out;
 }
 
 /**
@@ -400,33 +427,6 @@ export function negate(v, out = v) {
 	out.y = -v.y;
 	out.z = -v.z;
 	return out;
-}
-
-/**
- * Checks whether `v1` and `v2` have exactly equal components.
- *
- * @param {Vector3} v1 - The first vector.
- * @param {Vector3} v2 - The second vector.
- * @returns {boolean} Whether `v1` and `v2` are exactly equal.
- */
-export function equals(v1, v2) {
-	return v1.x === v2.x && v1.y === v2.y && v1.z === v2.z;
-}
-
-/**
- * Checks whether `v1` and `v2` are equal within `epsilon`.
- *
- * @param {Vector3} v1 - The first vector.
- * @param {Vector3} v2 - The second vector.
- * @param {number} [epsilon] - Maximum allowed difference per component. Defaults to `1e-6`.
- * @returns {boolean} Whether `v1` and `v2` are approximately equal.
- */
-export function almostEquals(v1, v2, epsilon = 1e-6) {
-	return (
-		Math.abs(v1.x - v2.x) <= epsilon &&
-		Math.abs(v1.y - v2.y) <= epsilon &&
-		Math.abs(v1.z - v2.z) <= epsilon
-	);
 }
 
 /**
