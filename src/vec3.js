@@ -13,165 +13,176 @@ export function clone(v) {
 }
 
 /**
- * Adds another vector's components to `v1`, mutating it in place.
+ * Adds `v2`'s components to `v1`.
  *
- * @param {Vector3} v1 - The vector to mutate.
+ * @param {Vector3} v1 - The vector to add to.
  * @param {Partial<Vector3>} v2 - Components to add; missing ones default to 0.
- * @returns {Vector3} The mutated `v1`.
+ * @param {Vector3} [out] - Vector to write the result to. Defaults to `v1`.
+ * @returns {Vector3} The mutated `out`.
  */
-export function add(v1, v2) {
-	v1.x += v2.x ?? 0;
-	v1.y += v2.y ?? 0;
-	v1.z += v2.z ?? 0;
-	return v1;
+export function add(v1, v2, out = v1) {
+	out.x += v2.x ?? 0;
+	out.y += v2.y ?? 0;
+	out.z += v2.z ?? 0;
+	return out;
 }
 
 /**
- * Adds x, y, z to `v`'s components, mutating it in place.
+ * Adds x, y, z to `v`'s components.
  *
- * @param {Vector3} v - The vector to mutate.
+ * @param {Vector3} v - The vector to add to.
  * @param {number} x - Value to add to `v.x`.
  * @param {number} y - Value to add to `v.y`.
  * @param {number} z - Value to add to `v.z`.
- * @returns {Vector3} The mutated `v`.
+ * @param {Vector3} [out] - Vector to write the result to. Defaults to `v`.
+ * @returns {Vector3} The mutated `out`.
  */
-export function addXYZ(v, x, y, z) {
-	v.x += x;
-	v.y += y;
-	v.z += z;
-	return v;
+export function addXYZ(v, x, y, z, out = v) {
+	out.x = v.x + x;
+	out.y = v.y + y;
+	out.z = v.z + z;
+	return out;
 }
 
 /**
- * Subtracts another vector's components from `v1`, mutating it in place.
+ * Subtracts `v2`'s components from `v1`.
  *
- * @param {Vector3} v1 - The vector to mutate.
+ * @param {Vector3} v1 - The vector to subtract from.
  * @param {Partial<Vector3>} v2 - Components to subtract; missing ones default to 0.
- * @returns {Vector3} The mutated `v1`.
+ * @param {Vector3} [out] - Vector to write the result to. Defaults to `v1`.
+ * @returns {Vector3} The mutated `out`.
  */
-export function subtract(v1, v2) {
-	v1.x -= v2.x ?? 0;
-	v1.y -= v2.y ?? 0;
-	v1.z -= v2.z ?? 0;
-	return v1;
+export function subtract(v1, v2, out = v1) {
+	out.x = v1.x - (v2.x ?? 0);
+	out.y = v1.y - (v2.y ?? 0);
+	out.z = v1.z - (v2.z ?? 0);
+	return out;
 }
 
 /**
- * Subtracts x, y, z from `v`'s components, mutating it in place.
+ * Subtracts x, y, z from `v`'s components.
  *
- * @param {Vector3} v - The vector to mutate.
+ * @param {Vector3} v - The vector to subtract from.
  * @param {number} x - Value to subtract from `v.x`.
  * @param {number} y - Value to subtract from `v.y`.
  * @param {number} z - Value to subtract from `v.z`.
- * @returns {Vector3} The mutated `v`.
+ * @param {Vector3} [out] - Vector to write the result to. Defaults to `v`.
+ * @returns {Vector3} The mutated `out`.
  */
-export function subtractXYZ(v, x, y, z) {
-	v.x -= x;
-	v.y -= y;
-	v.z -= z;
-	return v;
+export function subtractXYZ(v, x, y, z, out = v) {
+	out.x = v.x - x;
+	out.y = v.y - y;
+	out.z = v.z - z;
+	return out;
 }
 
 /**
- * Multiplies `v1`'s components by another vector's components, mutating it in place.
+ * Multiplies `v1`'s components by `v2`'s components.
  *
- * @param {Vector3} v1 - The vector to mutate.
+ * @param {Vector3} v1 - The vector to multiply.
  * @param {Partial<Vector3>} v2 - Components to multiply by; missing ones default to 1.
- * @returns {Vector3} The mutated `v1`.
+ * @param {Vector3} [out] - Vector to write the result to. Defaults to `v1`.
+ * @returns {Vector3} The mutated `out`.
  */
-export function multiply(v1, v2) {
-	v1.x *= v2.x ?? 1;
-	v1.y *= v2.y ?? 1;
-	v1.z *= v2.z ?? 1;
-	return v1;
+export function multiply(v1, v2, out = v1) {
+	out.x = v1.x * (v2.x ?? 1);
+	out.y = v1.y * (v2.y ?? 1);
+	out.z = v1.z * (v2.z ?? 1);
+	return out;
 }
 
 /**
- * Multiplies `v`'s components by x, y, z, mutating it in place.
+ * Multiplies `v`'s components by x, y, z.
  *
- * @param {Vector3} v - The vector to mutate.
+ * @param {Vector3} v - The vector to multiply.
  * @param {number} x - Value to multiply `v.x` by.
  * @param {number} y - Value to multiply `v.y` by.
  * @param {number} z - Value to multiply `v.z` by.
- * @returns {Vector3} The mutated `v`.
+ * @param {Vector3} [out] - Vector to write the result to. Defaults to `v`.
+ * @returns {Vector3} The mutated `out`.
  */
-export function multiplyXYZ(v, x, y, z) {
-	v.x *= x;
-	v.y *= y;
-	v.z *= z;
-	return v;
+export function multiplyXYZ(v, x, y, z, out = v) {
+	out.x = v.x * x;
+	out.y = v.y * y;
+	out.z = v.z * z;
+	return out;
 }
 
 /**
- * Multiplies `v`'s components by a scalar, mutating it in place.
+ * Multiplies `v`'s components by a scalar.
  *
- * @param {Vector3} v - The vector to mutate.
+ * @param {Vector3} v - The vector to multiply.
  * @param {number} scalar - Value to multiply each component by.
- * @returns {Vector3} The mutated `v`.
+ * @param {Vector3} [out] - Vector to write the result to. Defaults to `v`.
+ * @returns {Vector3} The mutated `out`.
  */
-export function multiplyScalar(v, scalar) {
-	v.x *= scalar;
-	v.y *= scalar;
-	v.z *= scalar;
-	return v;
+export function multiplyScalar(v, scalar, out = v) {
+	out.x = v.x * scalar;
+	out.y = v.y * scalar;
+	out.z = v.z * scalar;
+	return out;
 }
 
 /**
- * Divides `v1`'s components by another vector's components, mutating it in place.
+ * Divides `v1`'s components by `v2`'s components.
  *
- * @param {Vector3} v1 - The vector to mutate.
+ * @param {Vector3} v1 - The vector to divide.
  * @param {Partial<Vector3>} v2 - Components to divide by; missing ones default to 1.
- * @returns {Vector3} The mutated `v1`.
+ * @param {Vector3} [out] - Vector to write the result to. Defaults to `v1`.
+ * @returns {Vector3} The mutated `out`.
  */
-export function divide(v1, v2) {
-	v1.x /= v2.x ?? 1;
-	v1.y /= v2.y ?? 1;
-	v1.z /= v2.z ?? 1;
-	return v1;
+export function divide(v1, v2, out = v1) {
+	out.x = v1.x / (v2.x ?? 1);
+	out.y = v1.y / (v2.y ?? 1);
+	out.z = v1.z / (v2.z ?? 1);
+	return out;
 }
 
 /**
- * Divides `v`'s components by x, y, z, mutating it in place.
+ * Divides `v`'s components by x, y, z.
  *
- * @param {Vector3} v - The vector to mutate.
+ * @param {Vector3} v - The vector to divide.
  * @param {number} x - Value to divide `v.x` by.
  * @param {number} y - Value to divide `v.y` by.
  * @param {number} z - Value to divide `v.z` by.
- * @returns {Vector3} The mutated `v`.
+ * @param {Vector3} [out] - Vector to write the result to. Defaults to `v`.
+ * @returns {Vector3} The mutated `out`.
  */
-export function divideXYZ(v, x, y, z) {
-	v.x /= x;
-	v.y /= y;
-	v.z /= z;
-	return v;
+export function divideXYZ(v, x, y, z, out = v) {
+	out.x = v.x / x;
+	out.y = v.y / y;
+	out.z = v.z / z;
+	return out;
 }
 
 /**
- * Divides `v`'s components by a scalar, mutating it in place.
+ * Divides `v`'s components by a scalar.
  *
- * @param {Vector3} v - The vector to mutate.
+ * @param {Vector3} v - The vector to divide.
  * @param {number} scalar - Value to divide each component by.
- * @returns {Vector3} The mutated `v`.
+ * @param {Vector3} [out] - Vector to write the result to. Defaults to `v`.
+ * @returns {Vector3} The mutated `out`.
  */
-export function divideScalar(v, scalar) {
-	v.x /= scalar;
-	v.y /= scalar;
-	v.z /= scalar;
-	return v;
+export function divideScalar(v, scalar, out = v) {
+	out.x = v.x / scalar;
+	out.y = v.y / scalar;
+	out.z = v.z / scalar;
+	return out;
 }
 
 /**
- * Normalizes `v` in place, making it a unit vector.
+ * Normalizes `v`, making it a unit vector.
  *
- * @param {Vector3} v - The vector to mutate.
- * @returns {Vector3} The mutated `v`.
+ * @param {Vector3} v - The vector to normalize.
+ * @param {Vector3} [out] - Vector to write the result to. Defaults to `v`.
+ * @returns {Vector3} The mutated `out`.
  */
-export function normalize(v) {
+export function normalize(v, out = v) {
 	const len = length(v);
-	v.x /= len;
-	v.y /= len;
-	v.z /= len;
-	return v;
+	out.x = v.x / len;
+	out.y = v.y / len;
+	out.z = v.z / len;
+	return out;
 }
 
 /**
@@ -220,42 +231,45 @@ export function distanceSq(v1, v2) {
 }
 
 /**
- * Rounds `v`'s components down to the nearest integer, mutating it in place.
+ * Rounds `v`'s components down to the nearest integer.
  *
- * @param {Vector3} v - The vector to mutate.
- * @returns {Vector3} The mutated `v`.
+ * @param {Vector3} v - The vector to round.
+ * @param {Vector3} [out] - Vector to write the result to. Defaults to `v`.
+ * @returns {Vector3} The mutated `out`.
  */
-export function floor(v) {
-	v.x = Math.floor(v.x);
-	v.y = Math.floor(v.y);
-	v.z = Math.floor(v.z);
-	return v;
+export function floor(v, out = v) {
+	out.x = Math.floor(v.x);
+	out.y = Math.floor(v.y);
+	out.z = Math.floor(v.z);
+	return out;
 }
 
 /**
- * Rounds `v`'s components to the nearest integer, mutating it in place.
+ * Rounds `v`'s components to the nearest integer.
  *
- * @param {Vector3} v - The vector to mutate.
- * @returns {Vector3} The mutated `v`.
+ * @param {Vector3} v - The vector to round.
+ * @param {Vector3} [out] - Vector to write the result to. Defaults to `v`.
+ * @returns {Vector3} The mutated `out`.
  */
-export function round(v) {
-	v.x = Math.round(v.x);
-	v.y = Math.round(v.y);
-	v.z = Math.round(v.z);
-	return v;
+export function round(v, out = v) {
+	out.x = Math.round(v.x);
+	out.y = Math.round(v.y);
+	out.z = Math.round(v.z);
+	return out;
 }
 
 /**
- * Rounds `v`'s components up to the nearest integer, mutating it in place.
+ * Rounds `v`'s components up to the nearest integer.
  *
- * @param {Vector3} v - The vector to mutate.
- * @returns {Vector3} The mutated `v`.
+ * @param {Vector3} v - The vector to round.
+ * @param {Vector3} [out] - Vector to write the result to. Defaults to `v`.
+ * @returns {Vector3} The mutated `out`.
  */
-export function ceil(v) {
-	v.x = Math.ceil(v.x);
-	v.y = Math.ceil(v.y);
-	v.z = Math.ceil(v.z);
-	return v;
+export function ceil(v, out = v) {
+	out.x = Math.ceil(v.x);
+	out.y = Math.ceil(v.y);
+	out.z = Math.ceil(v.z);
+	return out;
 }
 
 /**

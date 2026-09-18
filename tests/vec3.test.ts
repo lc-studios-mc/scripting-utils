@@ -32,6 +32,15 @@ describe("addXYZ", () => {
 		expect(result).toBe(v);
 		expect(v).toEqual({ x: 11, y: 22, z: 33 });
 	});
+
+	it("writes the result to out and leaves v unmutated when out is given", () => {
+		const v = { x: 1, y: 2, z: 3 };
+		const out = { x: 0, y: 0, z: 0 };
+		const result = Vec3.addXYZ(v, 10, 20, 30, out);
+		expect(result).toBe(out);
+		expect(out).toEqual({ x: 11, y: 22, z: 33 });
+		expect(v).toEqual({ x: 1, y: 2, z: 3 });
+	});
 });
 
 describe("subtract", () => {
@@ -47,6 +56,15 @@ describe("subtract", () => {
 		Vec3.subtract(v1, { x: 5 });
 		expect(v1).toEqual({ x: 1, y: 2, z: 3 });
 	});
+
+	it("writes the result to out and leaves v1 unmutated when out is given", () => {
+		const v1 = { x: 11, y: 22, z: 33 };
+		const out = { x: 0, y: 0, z: 0 };
+		const result = Vec3.subtract(v1, { x: 1, y: 2, z: 3 }, out);
+		expect(result).toBe(out);
+		expect(out).toEqual({ x: 10, y: 20, z: 30 });
+		expect(v1).toEqual({ x: 11, y: 22, z: 33 });
+	});
 });
 
 describe("subtractXYZ", () => {
@@ -55,6 +73,15 @@ describe("subtractXYZ", () => {
 		const result = Vec3.subtractXYZ(v, 10, 20, 30);
 		expect(result).toBe(v);
 		expect(v).toEqual({ x: 1, y: 2, z: 3 });
+	});
+
+	it("writes the result to out and leaves v unmutated when out is given", () => {
+		const v = { x: 11, y: 22, z: 33 };
+		const out = { x: 0, y: 0, z: 0 };
+		const result = Vec3.subtractXYZ(v, 10, 20, 30, out);
+		expect(result).toBe(out);
+		expect(out).toEqual({ x: 1, y: 2, z: 3 });
+		expect(v).toEqual({ x: 11, y: 22, z: 33 });
 	});
 });
 
@@ -71,6 +98,15 @@ describe("multiply", () => {
 		Vec3.multiply(v1, { x: 5 });
 		expect(v1).toEqual({ x: 5, y: 2, z: 3 });
 	});
+
+	it("writes the result to out and leaves v1 unmutated when out is given", () => {
+		const v1 = { x: 1, y: 2, z: 3 };
+		const out = { x: 0, y: 0, z: 0 };
+		const result = Vec3.multiply(v1, { x: 10, y: 20, z: 30 }, out);
+		expect(result).toBe(out);
+		expect(out).toEqual({ x: 10, y: 40, z: 90 });
+		expect(v1).toEqual({ x: 1, y: 2, z: 3 });
+	});
 });
 
 describe("multiplyXYZ", () => {
@@ -80,6 +116,15 @@ describe("multiplyXYZ", () => {
 		expect(result).toBe(v);
 		expect(v).toEqual({ x: 10, y: 40, z: 90 });
 	});
+
+	it("writes the result to out and leaves v unmutated when out is given", () => {
+		const v = { x: 1, y: 2, z: 3 };
+		const out = { x: 0, y: 0, z: 0 };
+		const result = Vec3.multiplyXYZ(v, 10, 20, 30, out);
+		expect(result).toBe(out);
+		expect(out).toEqual({ x: 10, y: 40, z: 90 });
+		expect(v).toEqual({ x: 1, y: 2, z: 3 });
+	});
 });
 
 describe("multiplyScalar", () => {
@@ -88,6 +133,15 @@ describe("multiplyScalar", () => {
 		const result = Vec3.multiplyScalar(v, 10);
 		expect(result).toBe(v);
 		expect(v).toEqual({ x: 10, y: 20, z: 30 });
+	});
+
+	it("writes the result to out and leaves v unmutated when out is given", () => {
+		const v = { x: 1, y: 2, z: 3 };
+		const out = { x: 0, y: 0, z: 0 };
+		const result = Vec3.multiplyScalar(v, 10, out);
+		expect(result).toBe(out);
+		expect(out).toEqual({ x: 10, y: 20, z: 30 });
+		expect(v).toEqual({ x: 1, y: 2, z: 3 });
 	});
 });
 
@@ -104,6 +158,15 @@ describe("divide", () => {
 		Vec3.divide(v1, { x: 5 });
 		expect(v1).toEqual({ x: 1, y: 2, z: 3 });
 	});
+
+	it("writes the result to out and leaves v1 unmutated when out is given", () => {
+		const v1 = { x: 10, y: 40, z: 90 };
+		const out = { x: 0, y: 0, z: 0 };
+		const result = Vec3.divide(v1, { x: 10, y: 20, z: 30 }, out);
+		expect(result).toBe(out);
+		expect(out).toEqual({ x: 1, y: 2, z: 3 });
+		expect(v1).toEqual({ x: 10, y: 40, z: 90 });
+	});
 });
 
 describe("divideXYZ", () => {
@@ -113,6 +176,15 @@ describe("divideXYZ", () => {
 		expect(result).toBe(v);
 		expect(v).toEqual({ x: 1, y: 2, z: 3 });
 	});
+
+	it("writes the result to out and leaves v unmutated when out is given", () => {
+		const v = { x: 10, y: 40, z: 90 };
+		const out = { x: 0, y: 0, z: 0 };
+		const result = Vec3.divideXYZ(v, 10, 20, 30, out);
+		expect(result).toBe(out);
+		expect(out).toEqual({ x: 1, y: 2, z: 3 });
+		expect(v).toEqual({ x: 10, y: 40, z: 90 });
+	});
 });
 
 describe("divideScalar", () => {
@@ -121,6 +193,15 @@ describe("divideScalar", () => {
 		const result = Vec3.divideScalar(v, 10);
 		expect(result).toBe(v);
 		expect(v).toEqual({ x: 1, y: 2, z: 3 });
+	});
+
+	it("writes the result to out and leaves v unmutated when out is given", () => {
+		const v = { x: 10, y: 20, z: 30 };
+		const out = { x: 0, y: 0, z: 0 };
+		const result = Vec3.divideScalar(v, 10, out);
+		expect(result).toBe(out);
+		expect(out).toEqual({ x: 1, y: 2, z: 3 });
+		expect(v).toEqual({ x: 10, y: 20, z: 30 });
 	});
 });
 
@@ -132,6 +213,17 @@ describe("normalize", () => {
 		expect(v.x).toBeCloseTo(0.6);
 		expect(v.y).toBeCloseTo(0);
 		expect(v.z).toBeCloseTo(0.8);
+	});
+
+	it("writes the result to out and leaves v unmutated when out is given", () => {
+		const v = { x: 3, y: 0, z: 4 };
+		const out = { x: 0, y: 0, z: 0 };
+		const result = Vec3.normalize(v, out);
+		expect(result).toBe(out);
+		expect(out.x).toBeCloseTo(0.6);
+		expect(out.y).toBeCloseTo(0);
+		expect(out.z).toBeCloseTo(0.8);
+		expect(v).toEqual({ x: 3, y: 0, z: 4 });
 	});
 });
 
@@ -170,6 +262,15 @@ describe("floor", () => {
 		expect(result).toBe(v);
 		expect(v).toEqual({ x: 1, y: -2, z: 2 });
 	});
+
+	it("writes the result to out and leaves v unmutated when out is given", () => {
+		const v = { x: 1.9, y: -1.1, z: 2.5 };
+		const out = { x: 0, y: 0, z: 0 };
+		const result = Vec3.floor(v, out);
+		expect(result).toBe(out);
+		expect(out).toEqual({ x: 1, y: -2, z: 2 });
+		expect(v).toEqual({ x: 1.9, y: -1.1, z: 2.5 });
+	});
 });
 
 describe("round", () => {
@@ -179,6 +280,15 @@ describe("round", () => {
 		expect(result).toBe(v);
 		expect(v).toEqual({ x: 1, y: -1, z: 3 });
 	});
+
+	it("writes the result to out and leaves v unmutated when out is given", () => {
+		const v = { x: 1.4, y: -1.5, z: 2.5 };
+		const out = { x: 0, y: 0, z: 0 };
+		const result = Vec3.round(v, out);
+		expect(result).toBe(out);
+		expect(out).toEqual({ x: 1, y: -1, z: 3 });
+		expect(v).toEqual({ x: 1.4, y: -1.5, z: 2.5 });
+	});
 });
 
 describe("ceil", () => {
@@ -187,6 +297,15 @@ describe("ceil", () => {
 		const result = Vec3.ceil(v);
 		expect(result).toBe(v);
 		expect(v).toEqual({ x: 2, y: -1, z: 3 });
+	});
+
+	it("writes the result to out and leaves v unmutated when out is given", () => {
+		const v = { x: 1.1, y: -1.9, z: 2.5 };
+		const out = { x: 0, y: 0, z: 0 };
+		const result = Vec3.ceil(v, out);
+		expect(result).toBe(out);
+		expect(out).toEqual({ x: 2, y: -1, z: 3 });
+		expect(v).toEqual({ x: 1.1, y: -1.9, z: 2.5 });
 	});
 });
 
