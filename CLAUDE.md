@@ -30,6 +30,7 @@ convention the file you're editing already uses.
 ## Code Style
 
 - JSDoc required on all exported functions in `src/`.
+- Ensure type safety (check via `bun run typecheck`).
 - Format touched files before commiting.
 
 ## Notes
