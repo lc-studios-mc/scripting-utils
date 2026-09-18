@@ -469,6 +469,44 @@ export function slerp(v1, v2, t, out = v1) {
 }
 
 /**
+ * Reflects `v` off a surface with the given unit `normal`.
+ *
+ * @param {Vector3} v - The vector to reflect.
+ * @param {Vector3} normal - The unit-length surface normal to reflect off.
+ * @param {Vector3} [out] - Vector to write the result to. Defaults to `v`.
+ * @returns {Vector3} The mutated `out`.
+ */
+export function reflect(v, normal, out = v) {
+	const d = 2 * dot(v, normal);
+	const x = v.x - d * normal.x;
+	const y = v.y - d * normal.y;
+	const z = v.z - d * normal.z;
+	out.x = x;
+	out.y = y;
+	out.z = z;
+	return out;
+}
+
+/**
+ * Projects `v1` onto `v2`.
+ *
+ * @param {Vector3} v1 - The vector to project.
+ * @param {Vector3} v2 - The vector to project onto.
+ * @param {Vector3} [out] - Vector to write the result to. Defaults to `v1`.
+ * @returns {Vector3} The mutated `out`.
+ */
+export function project(v1, v2, out = v1) {
+	const scalar = dot(v1, v2) / lengthSq(v2);
+	const x = v2.x * scalar;
+	const y = v2.y * scalar;
+	const z = v2.z * scalar;
+	out.x = x;
+	out.y = y;
+	out.z = z;
+	return out;
+}
+
+/**
  * Converts local right/up/forward offsets into world-space points.
  *
  * @param {Vector3} origin - The world-space origin point.

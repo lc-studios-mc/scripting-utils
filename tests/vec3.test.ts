@@ -591,6 +591,77 @@ describe("slerp", () => {
 	});
 });
 
+describe("reflect", () => {
+	it("reverses a vector that hits the normal head-on and mutates v", () => {
+		const v = { x: 0, y: -1, z: 0 };
+		const result = Vec3.reflect(v, { x: 0, y: 1, z: 0 });
+		expect(result).toBe(v);
+		expect(v).toEqual({ x: 0, y: 1, z: 0 });
+	});
+
+	it("mirrors an incoming vector across a surface normal", () => {
+		const v = { x: 1, y: -1, z: 0 };
+		Vec3.reflect(v, { x: 0, y: 1, z: 0 });
+		expect(v).toEqual({ x: 1, y: 1, z: 0 });
+	});
+
+	it("leaves a vector parallel to the surface unchanged", () => {
+		const v = { x: 1, y: 0, z: 0 };
+		Vec3.reflect(v, { x: 0, y: 1, z: 0 });
+		expect(v).toEqual({ x: 1, y: 0, z: 0 });
+	});
+
+	it("writes the result to out and leaves inputs unmutated when out is given", () => {
+		const v = { x: 1, y: -1, z: 0 };
+		const normal = { x: 0, y: 1, z: 0 };
+		const out = { x: 0, y: 0, z: 0 };
+		const result = Vec3.reflect(v, normal, out);
+		expect(result).toBe(out);
+		expect(out).toEqual({ x: 1, y: 1, z: 0 });
+		expect(v).toEqual({ x: 1, y: -1, z: 0 });
+		expect(normal).toEqual({ x: 0, y: 1, z: 0 });
+	});
+});
+
+describe("project", () => {
+	it("projects v1 onto v2 and mutates v1", () => {
+		const v1 = { x: 3, y: 4, z: 0 };
+		const result = Vec3.project(v1, { x: 1, y: 0, z: 0 });
+		expect(result).toBe(v1);
+		expect(v1).toEqual({ x: 3, y: 0, z: 0 });
+	});
+
+	it("returns the zero vector when projecting onto an orthogonal vector", () => {
+		const v1 = { x: 1, y: 0, z: 0 };
+		Vec3.project(v1, { x: 0, y: 1, z: 0 });
+		expect(v1).toEqual({ x: 0, y: 0, z: 0 });
+	});
+
+	it("returns v1 unchanged when projecting onto a parallel vector of different length", () => {
+		const v1 = { x: 2, y: 0, z: 0 };
+		Vec3.project(v1, { x: 5, y: 0, z: 0 });
+		expect(v1).toEqual({ x: 2, y: 0, z: 0 });
+	});
+
+	it("writes the result to out and leaves inputs unmutated when out is given", () => {
+		const v1 = { x: 3, y: 4, z: 0 };
+		const v2 = { x: 1, y: 0, z: 0 };
+		const out = { x: 0, y: 0, z: 0 };
+		const result = Vec3.project(v1, v2, out);
+		expect(result).toBe(out);
+		expect(out).toEqual({ x: 3, y: 0, z: 0 });
+		expect(v1).toEqual({ x: 3, y: 4, z: 0 });
+		expect(v2).toEqual({ x: 1, y: 0, z: 0 });
+	});
+
+	it("is safe when out aliases v2", () => {
+		const v1 = { x: 3, y: 4, z: 0 };
+		const v2 = { x: 1, y: 0, z: 0 };
+		Vec3.project(v1, v2, v2);
+		expect(v2).toEqual({ x: 3, y: 0, z: 0 });
+	});
+});
+
 describe("resolveLocalOffsets", () => {
 	it("maps local axes onto world axes when rotation is zero", () => {
 		const origin = { x: 0, y: 0, z: 0 };
