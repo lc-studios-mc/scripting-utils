@@ -3,6 +3,28 @@ import { degToRad } from "./number.js";
 /** @import { Vector2, Vector3 } from "@minecraft/server" */
 
 /**
+ * Creates a new vector.
+ *
+ * @param {Partial<Vector3>} [v] - Components to use; missing ones default to 0.
+ * @returns {Vector3} A new vector.
+ */
+export function create(v) {
+	return { x: v?.x ?? 0, y: v?.y ?? 0, z: v?.z ?? 0 };
+}
+
+/**
+ * Creates a new vector from x, y, z.
+ *
+ * @param {number} x - The x component.
+ * @param {number} y - The y component.
+ * @param {number} z - The z component.
+ * @returns {Vector3} A new vector.
+ */
+export function createXYZ(x, y, z) {
+	return { x, y, z };
+}
+
+/**
  * Creates a new vector with the same components as `v`.
  *
  * @param {Vector3} v - The vector to copy.
