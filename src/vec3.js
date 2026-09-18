@@ -1,4 +1,6 @@
-/** @import { Vector3 } from "@minecraft/server" */
+import { degToRad } from "./number.js";
+
+/** @import { Vector2, Vector3 } from "@minecraft/server" */
 
 /**
  * Creates a new vector with the same components as `v`.
@@ -254,4 +256,44 @@ export function ceil(v) {
 	v.y = Math.ceil(v.y);
 	v.z = Math.ceil(v.z);
 	return v;
+}
+
+/**
+ * Converts local right/up/forward offsets into world-space points.
+ *
+ * @param {Vector3} origin - The world-space origin point.
+ * @param {Vector2} rotation - Pitch (`x`) and yaw (`y`) in degrees, e.g. from `entity.getRotation()`.
+ * @param {Vector3[]} localOffsets - Offsets in local space (x=right, y=up, z=forward).
+ * @param {Vector3[]} out - Output array, mutated in place; length must be >= `localOffsets.length`.
+ * @returns {Vector3[]} The mutated `out`.
+ * @throws {Error} If a `localOffsets` or `out` entry is missing at the same index.
+ */
+export function resolveLocalOffsets(origin, rotation, localOffsets, out) {
+	const pitch = degToRad(rotation.x);
+	const yaw = degToRad(rotation.y);
+
+	const sinP = Math.sin(pitch);
+	const cosP = Math.cos(pitch);
+	const sinY = Math.sin(yaw);
+	const cosY = Math.cos(yaw);
+
+	const fx = -cosP * sinY;
+	const fy = -sinP;
+	const fz = cosP * cosY;
+	const rx = cosY;
+	const rz = sinY;
+	const ux = -sinP * sinY;
+	const uy = cosP;
+	const uz = sinP * cosY;
+
+	for (let i = 0; i < localOffsets.length; i++) {
+		const v = localOffsets[i];
+		const o = out[i];
+		if (!v || !o) throw new Error(`Missing vector at index ${i}`);
+		o.x = origin.x + rx * v.x + ux * v.y + fx * v.z;
+		o.y = origin.y + uy * v.y + fy * v.z;
+		o.z = origin.z + rz * v.x + uz * v.y + fz * v.z;
+	}
+
+	return out;
 }

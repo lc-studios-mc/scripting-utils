@@ -189,3 +189,105 @@ describe("ceil", () => {
 		expect(v).toEqual({ x: 2, y: -1, z: 3 });
 	});
 });
+
+describe("resolveLocalOffsets", () => {
+	it("maps local axes onto world axes when rotation is zero", () => {
+		const origin = { x: 0, y: 0, z: 0 };
+		const out = [{ x: 0, y: 0, z: 0 }];
+		Vec3.resolveLocalOffsets(origin, { x: 0, y: 0 }, [{ x: 1, y: 2, z: 3 }], out);
+		const point = out[0]!;
+		expect(point.x).toBeCloseTo(1);
+		expect(point.y).toBeCloseTo(2);
+		expect(point.z).toBeCloseTo(3);
+	});
+
+	it("does not mutate origin or localOffsets, mutates out in place, and returns out", () => {
+		const origin = { x: 5, y: 5, z: 5 };
+		const localOffsets = [{ x: 1, y: 0, z: 0 }];
+		const out = [{ x: 0, y: 0, z: 0 }];
+		const outFirst = out[0];
+		const result = Vec3.resolveLocalOffsets(origin, { x: 0, y: 0 }, localOffsets, out);
+		expect(origin).toEqual({ x: 5, y: 5, z: 5 });
+		expect(localOffsets).toEqual([{ x: 1, y: 0, z: 0 }]);
+		expect(result).toBe(out);
+		expect(out[0]).toBe(outFirst);
+	});
+
+	it("rotates the forward offset with yaw", () => {
+		const origin = { x: 0, y: 0, z: 0 };
+		const out = [{ x: 0, y: 0, z: 0 }];
+		Vec3.resolveLocalOffsets(origin, { x: 0, y: 90 }, [{ x: 0, y: 0, z: 1 }], out);
+		const point = out[0]!;
+		expect(point.x).toBeCloseTo(-1);
+		expect(point.y).toBeCloseTo(0);
+		expect(point.z).toBeCloseTo(0);
+	});
+
+	it("does not throw or produce NaN when pitch is vertical", () => {
+		const origin = { x: 0, y: 0, z: 0 };
+		const out = [{ x: 0, y: 0, z: 0 }];
+		Vec3.resolveLocalOffsets(origin, { x: 90, y: 0 }, [{ x: 1, y: 0, z: 0 }], out);
+		const point = out[0]!;
+		expect(Number.isNaN(point.x)).toBe(false);
+		expect(Number.isNaN(point.y)).toBe(false);
+		expect(Number.isNaN(point.z)).toBe(false);
+	});
+
+	it("computes independent results for multiple entries, in input order", () => {
+		const origin = { x: 0, y: 0, z: 0 };
+		const out = [
+			{ x: 0, y: 0, z: 0 },
+			{ x: 0, y: 0, z: 0 },
+			{ x: 0, y: 0, z: 0 },
+		];
+		Vec3.resolveLocalOffsets(
+			origin,
+			{ x: 0, y: 0 },
+			[
+				{ x: 1, y: 0, z: 0 },
+				{ x: 0, y: 1, z: 0 },
+				{ x: 0, y: 0, z: 1 },
+			],
+			out,
+		);
+		expect(out[0]).toEqual({ x: 1, y: 0, z: 0 });
+		expect(out[1]).toEqual({ x: 0, y: 1, z: 0 });
+		expect(out[2]).toEqual({ x: 0, y: 0, z: 1 });
+	});
+
+	it("resolves multiple entries against a non-axis-aligned rotation", () => {
+		const origin = { x: 2, y: 3, z: -1 };
+		const out = [
+			{ x: 0, y: 0, z: 0 },
+			{ x: 0, y: 0, z: 0 },
+			{ x: 0, y: 0, z: 0 },
+			{ x: 0, y: 0, z: 0 },
+		];
+		Vec3.resolveLocalOffsets(
+			origin,
+			{ x: 25, y: 35 },
+			[
+				{ x: 1, y: 0, z: 0 },
+				{ x: 0, y: 1, z: 0 },
+				{ x: 0, y: 0, z: 1 },
+				{ x: 1, y: 2, z: 3 },
+			],
+			out,
+		);
+
+		// Computed independently from a right/up/forward basis derived from
+		// pitch/yaw (not copied from the implementation).
+		const expected = [
+			{ x: 2.819152044288992, y: 3, z: -0.42642356364895395 },
+			{ x: 1.757596123493896, y: 3.90630778703665, z: -0.6538113869412459 },
+			{ x: 1.4801632092743155, y: 2.5773817382593007, z: -0.25759612349389593 },
+			{ x: 0.7748339190997304, y: 3.544760788851202, z: 2.4931652919868665 },
+		];
+
+		for (let i = 0; i < expected.length; i++) {
+			expect(out[i]!.x).toBeCloseTo(expected[i]!.x);
+			expect(out[i]!.y).toBeCloseTo(expected[i]!.y);
+			expect(out[i]!.z).toBeCloseTo(expected[i]!.z);
+		}
+	});
+});
