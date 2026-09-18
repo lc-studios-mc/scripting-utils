@@ -304,9 +304,12 @@ export function resolveLocalOffsets(origin, rotation, localOffsets, out) {
 		const v = localOffsets[i];
 		const o = out[i];
 		if (!v || !o) throw new Error(`Missing vector at index ${i}`);
-		o.x = origin.x + rx * v.x + ux * v.y + fx * v.z;
-		o.y = origin.y + uy * v.y + fy * v.z;
-		o.z = origin.z + rz * v.x + uz * v.y + fz * v.z;
+		const vx = v.x;
+		const vy = v.y;
+		const vz = v.z;
+		o.x = origin.x + rx * vx + ux * vy + fx * vz;
+		o.y = origin.y + uy * vy + fy * vz;
+		o.z = origin.z + rz * vx + uz * vy + fz * vz;
 	}
 
 	return out;
